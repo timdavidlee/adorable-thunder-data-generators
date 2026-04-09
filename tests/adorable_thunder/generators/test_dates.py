@@ -47,3 +47,18 @@ def test_extrapolate_off_dates():
             <= off_date
             <= base_date + pd.Timedelta(days=14)
         )
+
+
+def test_choose_random_date_between_dates():
+    start_dates = pd.to_datetime(["2025-01-01", "2025-06-01", "2025-12-01"])
+    end_dates = pd.to_datetime(["2025-01-10", "2025-06-10", "2025-12-10"])
+    random_dates = choose_random_date_between_dates(start_dates, end_dates)
+
+    random_dates_after_start = random_dates >= start_dates
+    random_dates_before_end = random_dates <= end_dates
+
+    assert (
+        pd.concat([random_dates_after_start, random_dates_before_end], axis=1)
+        .all(axis=1)
+        .all()
+    )
