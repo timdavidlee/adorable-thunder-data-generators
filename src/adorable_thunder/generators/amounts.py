@@ -1,6 +1,8 @@
 import numpy as np
+import pandas as pd
 
 from adorable_thunder.common.math import round_weights_and_rebalance
+from adorable_thunder.generators.currency import USD_RATES
 
 
 def generate_amounts(
@@ -24,3 +26,22 @@ def generate_amounts(
     amount = np.clip(amount, min_amount, max_amount)
     amount = np.round(amount, 2)
     return amount
+
+
+def generate_local_currency_amounts(
+    amounts: np.ndarray,
+    currency_codes: np.ndarray,
+) -> pd.DataFrame:
+    """
+    Convert amounts to local currency using broad fixed exchange rates.
+
+    Returns a DataFrame with columns: currency_code, rate, amount_usd, amount_local.
+    """
+    local_amounts_df = pd.DataFrame({"currency_code": currency_codes})
+    local_amounts_df["rate"] = local_amounts_df["currency_code"].map(USD_RATES)
+    local_amounts_df["amount_usd"] = amounts
+    local_amounts_df["amount_local"] = (
+        local_amounts_df["amount_usd"] * local_amounts_df["rate"]
+    ).round(2)
+
+    return local_amounts_df

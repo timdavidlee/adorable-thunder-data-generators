@@ -44,6 +44,51 @@ CURRENCY_ENUM = StrEnum(
     {currency.code: currency.code for currency in TOP_CURRENCIES},
 )
 
+USD_RATES: dict[str, float] = {
+    "USD": 1.0,
+    "EUR": 0.92,
+    "GBP": 0.79,
+    "JPY": 149.0,
+    "CAD": 1.36,
+    "AUD": 1.53,
+    "CHF": 0.89,
+    "CNY": 7.24,
+    "INR": 83.5,
+    "MXN": 17.1,
+    "BRL": 4.97,
+    "KRW": 1325.0,
+    "SGD": 1.34,
+    "HKD": 7.82,
+    "NOK": 10.6,
+    "SEK": 10.4,
+    "DKK": 6.89,
+    "NZD": 1.63,
+    "ZAR": 18.6,
+    "TRY": 32.0,
+    "AED": 3.67,
+    "SAR": 3.75,
+    "THB": 35.1,
+    "IDR": 15700.0,
+    "MYR": 4.72,
+    "PHP": 56.5,
+    "PKR": 278.0,
+    "EGP": 30.9,
+    "CZK": 23.2,
+    "PLN": 4.02,
+    "HUF": 357.0,
+    "RUB": 85.0,
+    "TWD": 30.5,
+    "ILS": 3.09,
+}
+
+
+def usd_to(amount: float, currency_code: str) -> float | None:
+    """Convert USD to another currency. Returns None if code is unknown."""
+    rate = USD_RATES.get(currency_code.upper())
+    if rate is None:
+        return None
+    return round(amount * rate, 2)
+
 
 class CurrencyGenerator(BaseModel):
     def __init__(self):

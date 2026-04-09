@@ -8,6 +8,7 @@ from adorable_thunder.generators.identifiers import generate_serial_numbers_with
 class Request(BaseModel):
     request_system_id: str
     request_date: str
+    description: str | None = None
 
 
 class RequestGeneratorConfig(BaseModel):
