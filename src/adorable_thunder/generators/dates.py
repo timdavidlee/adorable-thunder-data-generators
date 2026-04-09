@@ -37,7 +37,9 @@ def generate_random_dates(
 
 
 def extrapolate_off_dates(
-    pd_date_series: pd.Series, min_days: int = -7, max_days: int = 14
+    pd_date_series: pd.Series,
+    min_days: int = -7,
+    max_days: int = 14,
 ) -> pd.Series:
     """
     Extrapolates off dates from a series of pandas datetime objects by adding a random number of days to each date.
@@ -51,3 +53,21 @@ def extrapolate_off_dates(
     random_days = np.random.randint(min_days, max_days + 1, size=len(pd_date_series))
     off_dates = pd_date_series + pd.to_timedelta(random_days, unit="D")
     return pd.Series(off_dates)
+
+
+def choose_random_date_between_dates(
+    start_dates: pd.Series, end_dates: pd.Series
+) -> pd.Series:
+    """
+    Chooses a random date between two series of pandas datetime objects.
+    Args:
+        start_dates: A pandas Series containing the start datetime objects
+        end_dates: A pandas Series containing the end datetime objects
+    Returns:
+        A pandas Series containing the randomly chosen dates between the start and end dates
+    """
+    random_days = np.random.randint(
+        0, (end_dates - start_dates).dt.days + 1, size=len(start_dates)
+    )
+    random_dates = start_dates + pd.to_timedelta(random_days, unit="D")
+    return pd.Series(random_dates)
