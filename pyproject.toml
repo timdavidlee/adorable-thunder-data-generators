@@ -1,0 +1,64 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "adorable_thunder"
+version = "0.1.0"
+description = "Data generators library"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = [
+    "case-converter>=1.2.0",
+    "humanfriendly>=10.0",
+    "numpy>=2.2.6",
+    "pandas>=2.3.3",
+    "pydantic>=2.12.5",
+    "ruff>=0.15.9",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+    "commitizen",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/adorable_thunder"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+files = ["src"]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.1.0"
+version_files = [
+    "pyproject.toml:^version",
+    "src/adorable_thunder/__init__.py:^__version__",
+]
+tag_format = "v$version"
+
+[tool.uv]
+dev-dependencies = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+    "commitizen",
+]
