@@ -29,4 +29,6 @@ def generate_company_and_products(n_samples: int) -> np.ndarray:
     """
     max_id = COMPANY_PRODUCT_DF.shape[0]
     indices = np.random.randint(0, max_id, size=n_samples)
-    return COMPANY_PRODUCT_DF.iloc[indices].reset_index(drop=True)
+    sampled_df: pd.DataFrame = COMPANY_PRODUCT_DF.iloc[indices].reset_index(drop=True)
+    two_column_array: np.ndarray = sampled_df[["company", "product"]].to_numpy()
+    return two_column_array

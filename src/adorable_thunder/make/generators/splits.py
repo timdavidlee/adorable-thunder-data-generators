@@ -79,7 +79,8 @@ def assign_split_weights_within_original_record(
     assert (
         df.groupby("splits")["split_weight"].sum().eq(1).all()
     ), "Weights for each original record must sum to 1"
-    return df.drop(columns=["weight_rank"])
+    formatted_df: pd.DataFrame = df.drop(columns=["weight_rank"])
+    return formatted_df
 
 
 def generate_split_weights_for_records(

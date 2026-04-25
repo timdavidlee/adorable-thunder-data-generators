@@ -1,5 +1,5 @@
 import numpy as np
-from enum import StrEnum
+from enum import Enum
 from pydantic import BaseModel
 
 from adorable_thunder.common.math import round_weights_and_rebalance
@@ -39,10 +39,32 @@ TOP_CURRENCIES = [
     PopularCurrency(code="DKK", name="Danish Krone", market_cap_trillions=0.4),
 ]
 
-CURRENCY_ENUM = StrEnum(
-    "CurrencyEnum",
-    {currency.code: currency.code for currency in TOP_CURRENCIES},
-)
+class CurrencyEnum(str, Enum):
+    USD = "USD"
+    EUR = "EUR"
+    CNY = "CNY"
+    JPY = "JPY"
+    INR = "INR"
+    GBP = "GBP"
+    BRL = "BRL"
+    CAD = "CAD"
+    RUB = "RUB"
+    KRW = "KRW"
+    AUD = "AUD"
+    MXN = "MXN"
+    IDR = "IDR"
+    SAR = "SAR"
+    TRY = "TRY"
+    CHF = "CHF"
+    TWD = "TWD"
+    PLN = "PLN"
+    SEK = "SEK"
+    NOK = "NOK"
+    AED = "AED"
+    THB = "THB"
+    ILS = "ILS"
+    ZAR = "ZAR"
+    DKK = "DKK"
 
 USD_RATES: dict[str, float] = {
     "USD": 1.0,
@@ -90,8 +112,8 @@ def usd_to(amount: float, currency_code: str) -> float | None:
     return round(amount * rate, 2)
 
 
-class CurrencyGenerator(BaseModel):
-    def __init__(self):
+class CurrencyGenerator:
+    def __init__(self) -> None:
         self.currencies = TOP_CURRENCIES
         self.currency_codes = [currency.code for currency in self.currencies]
         self.market_caps = np.array(

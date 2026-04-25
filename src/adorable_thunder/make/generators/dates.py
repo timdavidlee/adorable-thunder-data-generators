@@ -5,7 +5,7 @@ from adorable_thunder.common.math import round_weights_and_rebalance
 
 
 def generate_random_dates(
-    start_date: str, end_date: str, n_samples: int, dist_scaling: int | None = None
+    start_date: str, end_date: str, n_samples: int, dist_scaling: float | None = None
 ) -> pd.Series:
     """
     Generates a series of random dates between the specified start and end dates.

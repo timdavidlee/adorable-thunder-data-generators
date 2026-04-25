@@ -1,4 +1,5 @@
 import numpy as np
+from enum import Enum
 
 
 def round_weights_and_rebalance(weights: np.ndarray, precision: int = 4) -> np.ndarray:
@@ -14,7 +15,9 @@ def round_weights_and_rebalance(weights: np.ndarray, precision: int = 4) -> np.n
     return rounded_weights
 
 
-def get_weights(num_items: int, power_scale: int = 2, precision: int = 4) -> np.ndarray:
+def get_weights(
+    num_items: int, power_scale: float = 2.0, precision: int = 4
+) -> np.ndarray:
     """
     Args:
         num_items: The number of items to generate weights for
@@ -40,7 +43,7 @@ def generate_weighted_random_choice(
 
 
 def generate_weighted_enum_choices(
-    enum_cls: type, num_samples: int, power_scale: int = 1.5, precision: int = 4
+    enum_cls: type[Enum], num_samples: int, power_scale: float = 1.5, precision: int = 4
 ) -> np.ndarray:
     """
     Args:
@@ -49,8 +52,10 @@ def generate_weighted_enum_choices(
         power_scale: The power to which the rank of the item is raised. Higher values will result in a more skewed distribution.
         precision: The number of decimal places to round the weights to. Higher values will result in more precise weights, but may also result in weights that do not sum to 1 due to rounding errors.
     """
-    items = [item.value for item in enum_cls]
-    weights = get_weights(len(items), power_scale=power_scale, precision=precision)
+    items = [item.value for item in list(enum_cls)]
+    weights = get_weights(
+        num_items=len(items), power_scale=power_scale, precision=precision
+    )
     return generate_weighted_random_choice(
         items, n_samples=num_samples, weights=weights
     )

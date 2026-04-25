@@ -1,17 +1,17 @@
-from enum import StrEnum
+from enum import Enum
 from pydantic import BaseModel, Field
 
 
 # all of these should be ordered with the top state being the most common
 # and then descending in frequency from there, so that the generator will more often generate the more common states
-class RequestStatusStates(StrEnum):
+class RequestStatusStates(str, Enum):
     APPROVED = "approved"
     INITIATED = "initiated"
     PENDING = "pending"
     REJECTED = "rejected"
 
 
-class PurchaseOrderStatusStates(StrEnum):
+class PurchaseOrderStatusStates(str, Enum):
     APPROVED = "approved"
     PENDING = "pending"
     DRAFT = "draft"
@@ -19,7 +19,7 @@ class PurchaseOrderStatusStates(StrEnum):
     CANCELLED = "cancelled"
 
 
-class InvoiceStatusStates(StrEnum):
+class InvoiceStatusStates(str, Enum):
     PAID = "paid"
     RECEIVED = "received"
     PENDING = "pending"
@@ -28,7 +28,7 @@ class InvoiceStatusStates(StrEnum):
     IN_DISPUTE = "in_dispute"
 
 
-class PaymentStatusStates(StrEnum):
+class PaymentStatusStates(str, Enum):
     PAID = "paid"
     SCHEDULED = "scheduled"
     ON_HOLD = "on_hold"

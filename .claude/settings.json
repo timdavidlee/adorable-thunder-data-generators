@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:joseparreogarcia.substack.com)",
+      "WebFetch(domain:docs.anthropic.com)"
+    ]
+  }
+}
