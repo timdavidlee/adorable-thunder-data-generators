@@ -13,9 +13,7 @@ from adorable_thunder.make.field_generators.identifiers import (
 from adorable_thunder.make.field_generators.percentage import generate_tax_rates
 from adorable_thunder.make.record_generators.schemas import CreatePgTableSql
 
-_INVOICE_STATUSES = np.array(
-    ["paid", "sent", "pending", "on_hold", "cancelled", "in_dispute"]
-)
+_INVOICE_STATUSES = np.array(["paid", "sent", "pending", "on_hold", "cancelled", "in_dispute"])
 _INVOICE_STATUS_WEIGHTS = np.array([0.45, 0.25, 0.15, 0.08, 0.05, 0.02])
 
 

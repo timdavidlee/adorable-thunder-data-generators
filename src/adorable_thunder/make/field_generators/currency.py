@@ -1,5 +1,6 @@
+from enum import StrEnum
+
 import numpy as np
-from enum import Enum
 from pydantic import BaseModel
 
 from adorable_thunder.make.common.math import round_weights_and_rebalance
@@ -40,7 +41,7 @@ TOP_CURRENCIES = [
 ]
 
 
-class CurrencyEnum(str, Enum):
+class CurrencyEnum(StrEnum):
     USD = "USD"
     EUR = "EUR"
     CNY = "CNY"
@@ -118,9 +119,7 @@ class CurrencyGenerator:
     def __init__(self) -> None:
         self.currencies = TOP_CURRENCIES
         self.currency_codes = [currency.code for currency in self.currencies]
-        self.market_caps = np.array(
-            [currency.market_cap_trillions for currency in self.currencies]
-        )
+        self.market_caps = np.array([currency.market_cap_trillions for currency in self.currencies])
         self.weights = round_weights_and_rebalance(
             self.market_caps / self.market_caps.sum(),
             precision=4,

@@ -41,7 +41,7 @@ packages = ["src/adorable_thunder"]
 testpaths = ["tests"]
 
 [tool.ruff]
-line-length = 88
+line-length = 100
 src = ["src"]
 
 [tool.ruff.lint]

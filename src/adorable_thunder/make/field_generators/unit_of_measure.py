@@ -1,4 +1,5 @@
 import numpy as np
+
 from adorable_thunder.make.reference_data.units_of_measure import UNITS_OF_MEASURE
 
 _CODES = np.array([u[0] for u in UNITS_OF_MEASURE])

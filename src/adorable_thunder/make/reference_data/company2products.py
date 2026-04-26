@@ -1,6 +1,5 @@
 import pandas as pd
 
-
 COMPANY_PRODUCTS: dict[str, list[str]] = {
     # ── Technology ──────────────────────────────────────────────────────────────
     "Arcoven Systems": [
@@ -1712,6 +1711,6 @@ COMPANY_PRODUCTS: dict[str, list[str]] = {
 }
 
 
-COMPANY_PRODUCT_DF = pd.DataFrame(
-    COMPANY_PRODUCTS.items(), columns=["company", "product"]
-).explode("product")
+COMPANY_PRODUCT_DF = pd.DataFrame(COMPANY_PRODUCTS.items(), columns=["company", "product"]).explode(
+    "product"
+)

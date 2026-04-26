@@ -1,4 +1,5 @@
 import numpy as np
+
 from adorable_thunder.make.reference_data.person_names import FIRST_NAMES, LAST_NAMES
 
 
@@ -13,4 +14,4 @@ def generate_last_names(n_samples: int) -> np.ndarray:
 def generate_full_names(n_samples: int) -> np.ndarray:
     first = generate_first_names(n_samples)
     last = generate_last_names(n_samples)
-    return np.array([f"{f} {l}" for f, l in zip(first, last)])
+    return np.array([f"{f} {ln}" for f, ln in zip(first, last)])

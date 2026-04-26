@@ -50,8 +50,6 @@ _CALLING_CODES: dict[str, str] = {
     "PK": "+92",
     "NZ": "+64",
     "TW": "+886",
-    "AR": "+54",
-    "NG": "+234",
 }
 
 
@@ -62,9 +60,7 @@ def generate_phone_numbers(n_samples: int, country_code: str = "US") -> np.ndarr
     return np.array([f"{calling_code}{n}" for n in numbers])
 
 
-def generate_phone_numbers_mixed(
-    n_samples: int, country_codes: np.ndarray
-) -> np.ndarray:
+def generate_phone_numbers_mixed(n_samples: int, country_codes: np.ndarray) -> np.ndarray:
     """Generate E.164-format phone numbers matching a parallel array of country codes."""
     return np.array(
         [

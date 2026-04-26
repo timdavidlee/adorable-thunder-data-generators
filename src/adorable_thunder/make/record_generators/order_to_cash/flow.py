@@ -1,27 +1,30 @@
+from typing import ClassVar
+
 import pandas as pd
 
-from .cash_applications import generate_cash_applications, CASH_APPLICATION_TABLE_NAME
-from .cash_receipts import generate_cash_receipts, CASH_RECEIPTS_TABLE_NAME
-from .invoices import generate_invoices, INVOICES_TABLE_NAME
-from .quotes import generate_quotes, QUOTES_TABLE_NAME
-from .sales_orders import generate_sales_orders, SALES_ORDER_TABLE_NAME
-from .shipments import generate_shipments, SHIPMENTS_TABLE_NAME
 from adorable_thunder.make.record_generators.schemas import BaseGeneratorConfig
 
+from .cash_applications import CASH_APPLICATION_TABLE_NAME, generate_cash_applications
+from .cash_receipts import CASH_RECEIPTS_TABLE_NAME, generate_cash_receipts
+from .invoices import INVOICES_TABLE_NAME, generate_invoices
+from .quotes import QUOTES_TABLE_NAME, generate_quotes
+from .sales_orders import SALES_ORDER_TABLE_NAME, generate_sales_orders
+from .shipments import SHIPMENTS_TABLE_NAME, generate_shipments
+
+FLOW_NAME = "order_to_cash"
+
+
 class GeneratorConfig(BaseGeneratorConfig):
-    n_samples: int = 1000
+    name: ClassVar[str] = FLOW_NAME
     start_date: str = "2024-01-01"
     end_date: str = "2025-12-31"
-
-    def name(self):
-        return "order_to_cash"
 
     def make(self) -> dict[str, pd.DataFrame]:
         quotes = generate_quotes(self.n_samples, self.start_date, self.end_date)
 
-        active_quotes = quotes[
-            ~quotes["status"].isin(["rejected", "expired"])
-        ].reset_index(drop=True)
+        active_quotes = quotes[~quotes["status"].isin(["rejected", "expired"])].reset_index(
+            drop=True
+        )
         sales_orders = generate_sales_orders(
             len(active_quotes),
             start_date=self.start_date,
@@ -33,9 +36,7 @@ class GeneratorConfig(BaseGeneratorConfig):
             quote_currency_codes=active_quotes["currency_code"].to_numpy(),
         )
 
-        active_orders = sales_orders[sales_orders["status"] != "cancelled"].reset_index(
-            drop=True
-        )
+        active_orders = sales_orders[sales_orders["status"] != "cancelled"].reset_index(drop=True)
         shipments = generate_shipments(
             len(active_orders),
             start_date=self.start_date,
@@ -51,15 +52,9 @@ class GeneratorConfig(BaseGeneratorConfig):
             start_date=self.start_date,
             end_date=self.end_date,
             order_ids=active_orders.loc[active_ship_mask, "order_id"].to_numpy(),
-            ship_dates=shipments.loc[active_ship_mask, "ship_date"].reset_index(
-                drop=True
-            ),
-            order_net_amounts_usd=active_orders.loc[
-                active_ship_mask, "net_amount_usd"
-            ].to_numpy(),
-            currency_codes=active_orders.loc[
-                active_ship_mask, "currency_code"
-            ].to_numpy(),
+            ship_dates=shipments.loc[active_ship_mask, "ship_date"].reset_index(drop=True),
+            order_net_amounts_usd=active_orders.loc[active_ship_mask, "net_amount_usd"].to_numpy(),
+            currency_codes=active_orders.loc[active_ship_mask, "currency_code"].to_numpy(),
         )
 
         # invoices and the active_ship_mask subset of active_orders share the same index

@@ -1,5 +1,6 @@
-from adorable_thunder.make.reference_data.company_users import COMPANY_USER_EMAILS
 import numpy as np
+
+from adorable_thunder.make.reference_data.company_users import COMPANY_USER_EMAILS
 
 
 def generate_user_emails(n_samples: int) -> np.ndarray:

@@ -1,6 +1,6 @@
 import numpy as np
 
-# this is to be shared across all generators to ensure reproducibility and consistency in the generated data
+# shared across all generators to ensure reproducibility and consistency
 RANDOM_SEED = 42
 NP_RANDOM_STATE = np.random.RandomState(RANDOM_SEED)
 

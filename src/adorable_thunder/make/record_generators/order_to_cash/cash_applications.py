@@ -5,8 +5,8 @@ from adorable_thunder.make.field_generators.amounts import generate_amounts
 from adorable_thunder.make.field_generators.identifiers import generate_n_random_uuids
 from adorable_thunder.make.record_generators.schemas import CreatePgTableSql
 
-
 CASH_APPLICATION_TABLE_NAME = "cash_applications"
+
 
 def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
     return CreatePgTableSql(

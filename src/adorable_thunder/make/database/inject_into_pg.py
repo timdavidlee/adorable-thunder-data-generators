@@ -2,15 +2,35 @@
 
 import asyncio
 import io
-from typing import Callable
 
 import typer
-from psycopg import AsyncCursor, sql
 from pandas import DataFrame
+from psycopg import AsyncCursor, sql
 
 from adorable_thunder.make.database.database_connection import PgConnConfig
-from adorable_thunder.make.record_generators.order_to_cash import FLOW_SCHEMAS as O2C_FLOW_SCHEMAS, GeneratorConfig as O2CGeneratorConfig
-from adorable_thunder.make.record_generators.procure_to_pay import FLOW_SCHEMAS as P2P_FLOW_SCHEMAS, GeneratorConfig as P2PGeneratorConfig
+from adorable_thunder.make.record_generators.order_to_cash import (
+    FLOW_SCHEMAS as O2C_FLOW_SCHEMAS,
+)
+from adorable_thunder.make.record_generators.order_to_cash import (
+    GeneratorConfig as O2CGeneratorConfig,
+)
+from adorable_thunder.make.record_generators.procure_to_pay import (
+    FLOW_SCHEMAS as P2P_FLOW_SCHEMAS,
+)
+from adorable_thunder.make.record_generators.procure_to_pay import (
+    GeneratorConfig as P2PGeneratorConfig,
+)
+from adorable_thunder.make.record_generators.schemas import (
+    BaseGeneratorConfig,
+    CreatePgTableSql,
+)
+
+ALL_FLOW_GENERATORS: list[tuple[type[BaseGeneratorConfig], list[CreatePgTableSql]]] = [
+    (O2CGeneratorConfig, O2C_FLOW_SCHEMAS),
+    (P2PGeneratorConfig, P2P_FLOW_SCHEMAS),
+]
+
+_FLOW_NAMES = [config.name for config, _ in ALL_FLOW_GENERATORS]
 
 app = typer.Typer()
 
@@ -27,48 +47,58 @@ async def _copy_df(cur: AsyncCursor, df: DataFrame, table: str, pg_schema: str) 
 
 
 async def load_flow(
-    flow: str,
-    pg_schema: str,
+    flow_generator_config: type[BaseGeneratorConfig],
+    sql_schemas: list[CreatePgTableSql],
     pg_conn_config: PgConnConfig,
-    
     n_samples: int = 1000,
     drop: bool = False,
 ) -> None:
-    typer.echo(f"Generating {n_samples} {flow} records...")
-    data = _FLOW_GENERATORS[flow](n_samples=n_samples).make()
-    schemas = _FLOW_SCHEMAS[flow]
+    typer.echo(f"Generating {n_samples} {flow_generator_config.name} records...")
+    fgc = flow_generator_config(n_samples=n_samples)
+    data = fgc.make()
 
     async with await pg_conn_config.get_psycopg_conn() as conn:
         cur = conn.cursor()
 
-        for table, ddl_fn in schemas.items():
+        for create_sql_obj in sql_schemas:
             if drop:
                 await cur.execute(
                     sql.SQL("DROP TABLE IF EXISTS {}.{} CASCADE").format(
-                        sql.Identifier(pg_schema), sql.Identifier(table)
+                        sql.Identifier(create_sql_obj.pg_schema),
+                        sql.Identifier(create_sql_obj.pg_table),
                     )
                 )
-            await cur.execute(ddl_fn(pg_schema).encode())
+            await cur.execute(create_sql_obj.sql_statement.encode())
 
         for table, df in data.items():
             typer.echo(f"  {table}: {len(df)} rows")
-            await _copy_df(cur, df, table, pg_schema)
+            await _copy_df(cur, df, table, fgc.name)
 
     typer.echo("Done.")
 
 
 @app.command()
-def run(
-    pg_schema: str,
-    pg_conn_config: PgConnConfig,
-    flow: str = typer.Option("procure_to_pay", help=f"Flow to generate: {list(_FLOW_SCHEMAS)}"),
+def run_all(
+    pg_conn_config: PgConnConfig | None = None,
+    flow: str = typer.Option("procure_to_pay", help=f"Flow to generate: {_FLOW_NAMES}"),
     n_samples: int = 1000,
     drop: bool = typer.Option(False, "--drop", help="Drop and recreate tables before loading"),
 ) -> None:
-    if flow not in _FLOW_SCHEMAS:
-        typer.echo(f"Unknown flow '{flow}'. Choose from: {list(_FLOW_SCHEMAS)}", err=True)
-        raise typer.Exit(1)
-    asyncio.run(load_flow(flow, pg_schema, pg_conn_config, n_samples, drop))
+    pg_conn_config = pg_conn_config or PgConnConfig()
+
+    for generator_config, flow_schemas in ALL_FLOW_GENERATORS:
+        if flow != generator_config.name:
+            continue
+
+        asyncio.run(
+            load_flow(
+                flow_generator_config=generator_config,
+                sql_schemas=flow_schemas,
+                pg_conn_config=pg_conn_config,
+                n_samples=n_samples,
+                drop=drop,
+            )
+        )
 
 
 if __name__ == "__main__":

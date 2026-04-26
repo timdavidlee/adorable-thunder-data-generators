@@ -1,5 +1,6 @@
-import numpy as np
 from uuid import uuid4
+
+import numpy as np
 
 
 def generate_n_random_uuids(n: int) -> np.ndarray:

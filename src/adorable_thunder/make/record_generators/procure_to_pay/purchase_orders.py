@@ -17,7 +17,7 @@ from adorable_thunder.make.field_generators.identifiers import (
     generate_serial_numbers_with_prefix,
 )
 from adorable_thunder.make.field_generators.payment_terms import generate_payment_terms
-from adorable_thunder.make.record_generators.pg_structs import CreatePgTableSql
+from adorable_thunder.make.record_generators.schemas import CreatePgTableSql
 
 _PO_STATUSES = np.array(["approved", "pending", "draft", "rejected", "cancelled"])
 _PO_STATUS_WEIGHTS = np.array([0.55, 0.25, 0.10, 0.07, 0.03])
@@ -25,9 +25,7 @@ _PO_STATUS_WEIGHTS = np.array([0.55, 0.25, 0.10, 0.07, 0.03])
 _NON_USD = [c for c in TOP_CURRENCIES if c.code != "USD"]
 _NON_USD_CODES = np.array([c.code for c in _NON_USD])
 _NON_USD_CAPS = np.array([c.market_cap_trillions for c in _NON_USD])
-_NON_USD_WEIGHTS = round_weights_and_rebalance(
-    _NON_USD_CAPS / _NON_USD_CAPS.sum(), precision=4
-)
+_NON_USD_WEIGHTS = round_weights_and_rebalance(_NON_USD_CAPS / _NON_USD_CAPS.sum(), precision=4)
 
 
 PURCHASE_ORDERS_TABLE_NAME = "purchase_orders"
@@ -105,8 +103,6 @@ def generate_purchase_orders(
             "currency_code": fx_df["currency_code"],
             "total_amount_local": fx_df["amount_local"],
             "payment_terms": generate_payment_terms(n_samples),
-            "status": np.random.choice(
-                _PO_STATUSES, p=_PO_STATUS_WEIGHTS, size=n_samples
-            ),
+            "status": np.random.choice(_PO_STATUSES, p=_PO_STATUS_WEIGHTS, size=n_samples),
         }
     )

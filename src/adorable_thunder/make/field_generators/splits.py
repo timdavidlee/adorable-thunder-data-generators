@@ -13,11 +13,11 @@ def assign_random_splits(
     Args:
         n_samples: The number of random splits to generate
         min_splits: The minimum number of splits to generate (should be at least 1)
-        max_splits: The maximum number of splits to generate (should be greater than or equal to min_splits)
+        max_splits: The maximum number of splits to generate (should be >= min_splits)
         dist_scaling: The scaling factor for the distribution, if None, then uniform
             0.5 will result in 1/sqrt distribution,
             2 will result in 1/n^2 distribution, etc.
-            Higher values will result in a more skewed distribution towards the minimum number of splits.
+            Higher values skew the distribution towards the minimum number of splits.
     Returns:
         A numpy array containing the generated random splits
     """
@@ -36,7 +36,8 @@ def split_multiple_records(records: np.ndarray, splits: np.ndarray) -> np.ndarra
     Splits multiple records into multiple records based on the specified splits.
     Args:
         records: A numpy array containing the records to split
-        splits: A numpy array containing the number of splits for each record. Must be the same length as records.
+        splits: A numpy array containing the number of splits for each record.
+            Must be the same length as records.
     Returns:
         A numpy array containing the split records
     """
@@ -61,12 +62,14 @@ def assign_split_weights_within_original_record(
     splits: np.ndarray, precision: int = 4
 ) -> pd.DataFrame:
     """
-    Assigns random weights to each split record, ensuring that the weights for each original record sum to 1.
+    Assigns random weights to each split record, ensuring weights for each original record sum to 1.
     Args:
-        splits: A numpy array containing the number of splits for each original record. Must be the same length as the number of original records.
+        splits: A numpy array containing the number of splits for each original record.
+            Must be the same length as the number of original records.
         precision: Number of decimal places to round split weights to.
     Returns:
-        A numpy array containing the weights for each split record, where the weights for each original record sum to 1.
+        A numpy array containing the weights for each split record, where the weights for each
+        original record sum to 1.
     """
 
     df = pd.DataFrame({"splits": splits})
@@ -94,13 +97,14 @@ def generate_split_weights_for_records(
     Args:
         records: A numpy array containing the records to split
         min_splits: The minimum number of splits to generate (should be at least 1)
-        max_splits: The maximum number of splits to generate (should be greater than or equal to min_splits)
+        max_splits: The maximum number of splits to generate (should be >= min_splits)
         dist_scaling: The scaling factor for the distribution, if None, then uniform
             0.5 will result in 1/sqrt distribution,
             2 will result in 1/n^2 distribution, etc.
-            Higher values will result in a more skewed distribution towards the minimum number of splits.
+            Higher values skew the distribution towards the minimum number of splits.
     Returns:
-        A pandas DataFrame containing the split records and their corresponding weights, where the weights for each original record sum to 1.
+        A pandas DataFrame containing the split records and their corresponding weights, where the
+        weights for each original record sum to 1.
     """
     splits = assign_random_splits(
         n_samples=len(records),

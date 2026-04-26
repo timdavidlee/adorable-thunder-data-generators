@@ -1,20 +1,21 @@
-from pathlib import Path
+from typing import ClassVar
 
 import pandas as pd
 
-from .invoices import generate_invoices, INVOICES_TABLE_NAME
-from .payments import generate_payments, PAYMENTS_TABLE_NAME
-from .purchase_orders import generate_purchase_orders, PURCHASE_ORDERS_TABLE_NAME
-from .requests import generate_requests, REQUESTS_TABLE_NAME
 from adorable_thunder.make.record_generators.schemas import BaseGeneratorConfig
 
+from .invoices import INVOICES_TABLE_NAME, generate_invoices
+from .payments import PAYMENTS_TABLE_NAME, generate_payments
+from .purchase_orders import PURCHASE_ORDERS_TABLE_NAME, generate_purchase_orders
+from .requests import REQUESTS_TABLE_NAME, generate_requests
+
+FLOW_NAME = "procure_to_pay"
+
+
 class GeneratorConfig(BaseGeneratorConfig):
-    n_samples: int = 1000
+    name: ClassVar[str] = FLOW_NAME
     start_date: str = "2024-01-01"
     end_date: str = "2025-12-31"
-
-    def name(self):
-        return "procure_to_pay"
 
     def make(self) -> dict[str, pd.DataFrame]:
         requests = generate_requests(self.n_samples, self.start_date, self.end_date)

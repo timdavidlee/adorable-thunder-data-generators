@@ -1,5 +1,4 @@
 import psycopg
-
 from pydantic import BaseModel
 
 

@@ -14,7 +14,7 @@ from adorable_thunder.make.field_generators.identifiers import (
     generate_serial_numbers_with_prefix,
 )
 from adorable_thunder.make.field_generators.users import generate_user_emails
-from adorable_thunder.make.record_generators.pg_structs import CreatePgTableSql
+from adorable_thunder.make.record_generators.schemas import CreatePgTableSql
 
 _REQUEST_STATUSES = np.array(["approved", "initiated", "pending", "rejected"])
 _REQUEST_STATUS_WEIGHTS = np.array([0.55, 0.20, 0.15, 0.10])
@@ -22,9 +22,7 @@ _REQUEST_STATUS_WEIGHTS = np.array([0.55, 0.20, 0.15, 0.10])
 _NON_USD = [c for c in TOP_CURRENCIES if c.code != "USD"]
 _NON_USD_CODES = np.array([c.code for c in _NON_USD])
 _NON_USD_CAPS = np.array([c.market_cap_trillions for c in _NON_USD])
-_NON_USD_WEIGHTS = round_weights_and_rebalance(
-    _NON_USD_CAPS / _NON_USD_CAPS.sum(), precision=4
-)
+_NON_USD_WEIGHTS = round_weights_and_rebalance(_NON_USD_CAPS / _NON_USD_CAPS.sum(), precision=4)
 
 
 REQUESTS_TABLE_NAME = "requests"

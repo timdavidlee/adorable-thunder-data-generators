@@ -19,6 +19,4 @@ def generate_fiscal_periods(
         periods = np.random.randint(1, 13, size=n_samples)
         return np.array([f"FY{y}-P{p:02d}" for y, p in zip(years, periods)])
     else:
-        raise ValueError(
-            f"granularity must be 'quarter' or 'month', got {granularity!r}"
-        )
+        raise ValueError(f"granularity must be 'quarter' or 'month', got {granularity!r}")

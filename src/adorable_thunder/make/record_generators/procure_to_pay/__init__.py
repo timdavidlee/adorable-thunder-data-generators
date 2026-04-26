@@ -1,13 +1,13 @@
+from adorable_thunder.make.record_generators.schemas import CreatePgTableSql
+
 from . import invoices, payments, purchase_orders, requests
-from .flow import GeneratorConfig
+from .flow import FLOW_NAME, GeneratorConfig
 
-_PG_SCHEMA = "procure_to_pay"
-
-FLOW_SCHEMAS = [
-    requests.create_pg_sql_table_schema(_PG_SCHEMA),
-    purchase_orders.create_pg_sql_table_schema(_PG_SCHEMA),
-    invoices.create_pg_sql_table_schema(_PG_SCHEMA),
-    payments.create_pg_sql_table_schema(_PG_SCHEMA),
+FLOW_SCHEMAS: list[CreatePgTableSql] = [
+    requests.create_pg_sql_table_schema(FLOW_NAME),
+    purchase_orders.create_pg_sql_table_schema(FLOW_NAME),
+    invoices.create_pg_sql_table_schema(FLOW_NAME),
+    payments.create_pg_sql_table_schema(FLOW_NAME),
 ]
 
 __all__ = ["GeneratorConfig", "FLOW_SCHEMAS"]

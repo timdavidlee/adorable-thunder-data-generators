@@ -15,9 +15,7 @@ from adorable_thunder.make.record_generators.schemas import CreatePgTableSql
 _RECEIPT_STATUSES = np.array(["posted", "pending", "on_hold", "reversed"])
 _RECEIPT_STATUS_WEIGHTS = np.array([0.60, 0.25, 0.10, 0.05])
 
-_PAYMENT_METHODS = np.array(
-    ["ACH", "Wire Transfer", "Check", "Credit Card", "Virtual Card"]
-)
+_PAYMENT_METHODS = np.array(["ACH", "Wire Transfer", "Check", "Credit Card", "Virtual Card"])
 _PAYMENT_METHOD_WEIGHTS = np.array([0.35, 0.30, 0.10, 0.20, 0.05])
 
 CASH_RECEIPTS_TABLE_NAME = "cash_applications"

@@ -1,14 +1,15 @@
 import numpy as np
 import pandas as pd
+
 from adorable_thunder.make.reference_data.ledger_accounts import (
-    GENERAL_LEDGER_ACCOUNTS,
     ASSET_ACCOUNTS,
-    LIABILITY_ACCOUNTS,
-    EQUITY_ACCOUNTS,
-    REVENUE_ACCOUNTS,
     COGS_ACCOUNTS,
+    EQUITY_ACCOUNTS,
+    GENERAL_LEDGER_ACCOUNTS,
+    LIABILITY_ACCOUNTS,
     OPEX_ACCOUNTS,
     OTHER_INCOME_EXPENSE_ACCOUNTS,
+    REVENUE_ACCOUNTS,
 )
 
 _ACCOUNT_POOLS = {
@@ -34,6 +35,4 @@ def generate_ledger_accounts(
         else GENERAL_LEDGER_ACCOUNTS
     )
     indices: list[int] = np.random.randint(0, len(pool), size=n_samples).tolist()
-    return pd.DataFrame(
-        [pool[i] for i in indices], columns=["account_code", "account_name"]
-    )
+    return pd.DataFrame([pool[i] for i in indices], columns=["account_code", "account_name"])
