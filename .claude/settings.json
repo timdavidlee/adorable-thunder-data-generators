@@ -20,7 +20,8 @@
       "Bash(cp /Users/timlee/myrepos/adorable-thunder-data-generators/tests/adorable_thunder/generators/test_dates.py /Users/timlee/myrepos/adorable-thunder-data-generators/tests/adorable_thunder/make/field_generators/test_dates.py)",
       "Bash(rm /Users/timlee/myrepos/adorable-thunder-data-generators/tests/adorable_thunder/generators/test_dates.py)",
       "Bash(rmdir /Users/timlee/myrepos/adorable-thunder-data-generators/tests/adorable_thunder/generators)",
-      "Bash(xargs -I{} basename {} .md)"
+      "Bash(xargs -I{} basename {} .md)",
+      "Bash(xargs basename *)"
     ]
   }
 }

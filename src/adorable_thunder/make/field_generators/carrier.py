@@ -2,8 +2,6 @@ import numpy as np
 import pandas as pd
 from adorable_thunder.make.reference_data.carriers import CARRIERS
 
-_MODES = np.array([c.primary_mode for c in CARRIERS])
-
 
 def generate_carriers(n_samples: int, mode: str | None = None) -> pd.DataFrame:
     """Returns carrier_scac, carrier_name, transport_mode columns.

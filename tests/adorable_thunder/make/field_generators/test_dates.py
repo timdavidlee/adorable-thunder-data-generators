@@ -1,6 +1,4 @@
-import pytest
 import pandas as pd
-from collections import Counter
 
 from adorable_thunder.make.field_generators.dates import (
     generate_random_dates,
@@ -38,7 +36,7 @@ def test_generate_random_dates_with_dist_scaling():
 
 
 def test_extrapolate_off_dates():
-    base_dates = pd.to_datetime(["2025-01-01", "2025-06-01", "2025-12-01"])
+    base_dates = pd.Series(pd.to_datetime(["2025-01-01", "2025-06-01", "2025-12-01"]))
     off_dates = extrapolate_off_dates(base_dates, min_days=2, max_days=14)
     assert len(off_dates) == len(base_dates)
     for base_date, off_date in zip(base_dates, off_dates):
@@ -50,8 +48,8 @@ def test_extrapolate_off_dates():
 
 
 def test_choose_random_date_between_dates():
-    start_dates = pd.to_datetime(["2025-01-01", "2025-06-01", "2025-12-01"])
-    end_dates = pd.to_datetime(["2025-01-10", "2025-06-10", "2025-12-10"])
+    start_dates = pd.Series(pd.to_datetime(["2025-01-01", "2025-06-01", "2025-12-01"]))
+    end_dates = pd.Series(pd.to_datetime(["2025-01-10", "2025-06-10", "2025-12-10"]))
     random_dates = choose_random_date_between_dates(start_dates, end_dates)
 
     random_dates_after_start = random_dates >= start_dates
