@@ -32,9 +32,6 @@ ALL_FLOW_GENERATORS: list[tuple[type[BaseGeneratorConfig], list[CreatePgTableSql
 
 _FLOW_NAMES = [config.name for config, _ in ALL_FLOW_GENERATORS]
 
-app = typer.Typer()
-
-
 async def _copy_df(cur: AsyncCursor, df: DataFrame, table: str, pg_schema: str) -> None:
     buf = io.StringIO()
     df.to_csv(buf, index=False, header=False)
@@ -60,6 +57,10 @@ async def load_flow(
     async with await pg_conn_config.get_psycopg_conn() as conn:
         cur = conn.cursor()
 
+        await cur.execute(
+            sql.SQL("CREATE SCHEMA IF NOT EXISTS {}").format(sql.Identifier(fgc.name))
+        )
+
         for create_sql_obj in sql_schemas:
             if drop:
                 await cur.execute(
@@ -77,14 +78,12 @@ async def load_flow(
     typer.echo("Done.")
 
 
-@app.command()
 def run_all(
-    pg_conn_config: PgConnConfig | None = None,
     flow: str = typer.Option("procure_to_pay", help=f"Flow to generate: {_FLOW_NAMES}"),
     n_samples: int = 1000,
     drop: bool = typer.Option(False, "--drop", help="Drop and recreate tables before loading"),
 ) -> None:
-    pg_conn_config = pg_conn_config or PgConnConfig()
+    pg_conn_config = PgConnConfig()
 
     for generator_config, flow_schemas in ALL_FLOW_GENERATORS:
         if flow != generator_config.name:
@@ -102,4 +101,4 @@ def run_all(
 
 
 if __name__ == "__main__":
-    app()
+    typer.run(run_all)

@@ -6,8 +6,6 @@ build-backend = "hatchling.build"
 name = "adorable_thunder"
 version = "0.1.0"
 description = "Data generators library"
-readme = "README.md"
-license = { file = "LICENSE" }
 requires-python = ">=3.13"
 dependencies = [
     "anthropic>=0.40.0",
