@@ -17,6 +17,7 @@ from adorable_thunder.make.field_generators.identifiers import (
     generate_serial_numbers_with_prefix,
 )
 from adorable_thunder.make.field_generators.payment_terms import generate_payment_terms
+from adorable_thunder.make.record_generators.pg_structs import CreatePgTableSql
 
 _PO_STATUSES = np.array(["approved", "pending", "draft", "rejected", "cancelled"])
 _PO_STATUS_WEIGHTS = np.array([0.55, 0.25, 0.10, 0.07, 0.03])
@@ -27,6 +28,29 @@ _NON_USD_CAPS = np.array([c.market_cap_trillions for c in _NON_USD])
 _NON_USD_WEIGHTS = round_weights_and_rebalance(
     _NON_USD_CAPS / _NON_USD_CAPS.sum(), precision=4
 )
+
+
+PURCHASE_ORDERS_TABLE_NAME = "purchase_orders"
+
+
+def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
+    return CreatePgTableSql(
+        pg_schema=pg_schema,
+        pg_table=PURCHASE_ORDERS_TABLE_NAME,
+        pg_columns=[
+            "po_id              UUID           PRIMARY KEY",
+            "request_id         UUID           NOT NULL",
+            "po_number          TEXT           NOT NULL",
+            "po_date            DATE           NOT NULL",
+            "supplier_name      TEXT           NOT NULL",
+            "line_item_count    INTEGER        NOT NULL",
+            "total_amount_usd   NUMERIC(18, 2) NOT NULL",
+            "currency_code      VARCHAR(3)     NOT NULL",
+            "total_amount_local NUMERIC(18, 2) NOT NULL",
+            "payment_terms      TEXT           NOT NULL",
+            "status             TEXT           NOT NULL",
+        ],
+    )
 
 
 def generate_purchase_orders(

@@ -21,7 +21,12 @@
       "Bash(rm /Users/timlee/myrepos/adorable-thunder-data-generators/tests/adorable_thunder/generators/test_dates.py)",
       "Bash(rmdir /Users/timlee/myrepos/adorable-thunder-data-generators/tests/adorable_thunder/generators)",
       "Bash(xargs -I{} basename {} .md)",
-      "Bash(xargs basename *)"
+      "Bash(xargs basename *)",
+      "Read(//private/tmp/**)",
+      "Bash(rm -rf /tmp/procure_to_pay)"
+    ],
+    "additionalDirectories": [
+      "/Users/timlee/myrepos/adorable-thunder-data-generators/src/adorable_thunder/make/record_generators"
     ]
   }
 }

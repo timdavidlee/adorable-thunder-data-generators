@@ -11,10 +11,10 @@ from adorable_thunder.make.field_generators.identifiers import (
     generate_serial_numbers_with_prefix,
 )
 from adorable_thunder.make.field_generators.percentage import generate_tax_rates
-from adorable_thunder.make.record_generators.pg_structs import CreatePgTableSql
+from adorable_thunder.make.record_generators.schemas import CreatePgTableSql
 
 _INVOICE_STATUSES = np.array(
-    ["paid", "received", "pending", "on_hold", "cancelled", "in_dispute"]
+    ["paid", "sent", "pending", "on_hold", "cancelled", "in_dispute"]
 )
 _INVOICE_STATUS_WEIGHTS = np.array([0.45, 0.25, 0.15, 0.08, 0.05, 0.02])
 
@@ -28,12 +28,14 @@ def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
         pg_table=INVOICES_TABLE_NAME,
         pg_columns=[
             "invoice_id      UUID           PRIMARY KEY",
-            "po_id           UUID           NOT NULL",
+            "order_id        UUID           NOT NULL",
             "invoice_number  TEXT           NOT NULL",
             "invoice_date    DATE           NOT NULL",
             "due_date        DATE           NOT NULL",
-            "amount_invoiced NUMERIC(18, 2) NOT NULL",
+            "currency_code   VARCHAR(3)     NOT NULL",
+            "subtotal_amount NUMERIC(18, 2) NOT NULL",
             "tax_amount      NUMERIC(18, 2) NOT NULL",
+            "total_amount    NUMERIC(18, 2) NOT NULL",
             "status          TEXT           NOT NULL",
         ],
     )
@@ -43,48 +45,55 @@ def generate_invoices(
     n_samples: int,
     start_date: str = "2024-01-01",
     end_date: str = "2025-12-31",
-    po_ids: np.ndarray | None = None,
-    po_dates: pd.Series | None = None,
-    po_amounts_usd: np.ndarray | None = None,
+    order_ids: np.ndarray | None = None,
+    ship_dates: pd.Series | None = None,
+    order_net_amounts_usd: np.ndarray | None = None,
+    currency_codes: np.ndarray | None = None,
 ) -> pd.DataFrame:
-    if po_ids is None:
-        po_ids = generate_n_random_uuids(n_samples)
+    if order_ids is None:
+        order_ids = generate_n_random_uuids(n_samples)
 
-    if po_dates is not None:
-        # PO → invoice: 14–90 days per P2P cycle time benchmarks
-        invoice_dates = extrapolate_off_dates(po_dates, min_days=14, max_days=90)
+    if ship_dates is not None:
+        # Ship → invoice: 0–5 days to process and issue
+        invoice_dates = extrapolate_off_dates(ship_dates, min_days=0, max_days=5)
     else:
         invoice_dates = generate_random_dates(start_date, end_date, n_samples)
 
     due_dates = extrapolate_off_dates(invoice_dates, min_days=30, max_days=60)
 
-    if po_amounts_usd is not None:
-        # Invoice ≈ PO amount ±2% for minor FX/adjustment tolerance per brief
+    if order_net_amounts_usd is not None:
+        # Invoice subtotal ≈ order net ±2% for minor adjustments
         variation = np.random.uniform(-0.02, 0.02, n_samples)
-        amounts_invoiced = np.round(po_amounts_usd * (1 + variation), 2)
+        subtotal_amounts = np.round(order_net_amounts_usd * (1 + variation), 2)
     else:
-        amounts_invoiced = generate_amounts(
+        subtotal_amounts = generate_amounts(
             n_samples,
-            min_amount=1_000.0,
+            min_amount=500.0,
             max_amount=500_000.0,
-            mu=10.0,
+            mu=9.5,
             sigma=1.8,
         )
 
     tax_rates = generate_tax_rates(n_samples)
-    tax_amounts = np.round(amounts_invoiced * tax_rates, 2)
+    tax_amounts = np.round(subtotal_amounts * tax_rates, 2)
+    total_amounts = np.round(subtotal_amounts + tax_amounts, 2)
+
+    if currency_codes is None:
+        currency_codes = np.full(n_samples, "USD")
 
     return pd.DataFrame(
         {
             "invoice_id": generate_n_random_uuids(n_samples),
-            "po_id": po_ids,
+            "order_id": order_ids,
             "invoice_number": generate_serial_numbers_with_prefix(
                 n_samples, prefix="INV-", total_length=12
             ),
             "invoice_date": invoice_dates,
             "due_date": due_dates,
-            "amount_invoiced": amounts_invoiced,
+            "currency_code": currency_codes,
+            "subtotal_amount": subtotal_amounts,
             "tax_amount": tax_amounts,
+            "total_amount": total_amounts,
             "status": np.random.choice(
                 _INVOICE_STATUSES, p=_INVOICE_STATUS_WEIGHTS, size=n_samples
             ),

@@ -9,6 +9,7 @@ from adorable_thunder.make.field_generators.dates import (
     generate_random_dates,
 )
 from adorable_thunder.make.field_generators.identifiers import generate_n_random_uuids
+from adorable_thunder.make.record_generators.pg_structs import CreatePgTableSql
 
 _PAYMENT_STATUSES = np.array(["paid", "scheduled", "on_hold", "cancelled"])
 _PAYMENT_STATUS_WEIGHTS = np.array([0.60, 0.25, 0.10, 0.05])
@@ -24,6 +25,25 @@ _NON_USD_CAPS = np.array([c.market_cap_trillions for c in _NON_USD])
 _NON_USD_WEIGHTS = round_weights_and_rebalance(
     _NON_USD_CAPS / _NON_USD_CAPS.sum(), precision=4
 )
+
+
+PAYMENTS_TABLE_NAME = "payments"
+
+
+def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
+    return CreatePgTableSql(
+        pg_schema=pg_schema,
+        pg_table=PAYMENTS_TABLE_NAME,
+        pg_columns=[
+            "payment_id     UUID           PRIMARY KEY",
+            "invoice_id     UUID           NOT NULL",
+            "payment_date   DATE           NOT NULL",
+            "amount_paid    NUMERIC(18, 2) NOT NULL",
+            "currency_code  VARCHAR(3)     NOT NULL",
+            "payment_method TEXT           NOT NULL",
+            "status         TEXT           NOT NULL",
+        ],
+    )
 
 
 def generate_payments(
