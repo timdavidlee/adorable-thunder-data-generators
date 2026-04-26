@@ -1,5 +1,3 @@
-from enum import StrEnum
-
 import numpy as np
 from pydantic import BaseModel
 

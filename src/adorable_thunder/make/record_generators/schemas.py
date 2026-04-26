@@ -7,14 +7,27 @@ import pandas as pd
 from pydantic import BaseModel
 
 
+class PgColumn(BaseModel):
+    """
+    then name will be the column name, 
+    and the suffix will 
+    """
+    name: str
+    modifiers: str
+
+    @property
+    def sql_row(self):
+        return f"{self.name} {self.modifiers}"
+
+
 class CreatePgTableSql(BaseModel):
     pg_schema: str
     pg_table: str
-    pg_columns: list[str]
+    pg_columns: list[PgColumn]
 
     @property
     def sql_statement(self) -> str:
-        columns = ",\n    ".join(self.pg_columns)
+        columns = ",\n    ".join([c.sql_row for c in self.pg_columns])
         return f"CREATE TABLE IF NOT EXISTS {self.pg_schema}.{self.pg_table} (\n    {columns}\n);"
 
 
