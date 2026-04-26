@@ -29,10 +29,10 @@ _STREET_NAMES = [
 def generate_addresses(n_samples: int, country_code: str | None = None) -> pd.DataFrame:
     """Returns street_address, city, state_province, country_code, postal_code.
     Pass country_code to restrict to cities in a specific country."""
-    pool = [c for c in CITIES if c[2] == country_code] if country_code else CITIES
+    pool = [c for c in CITIES if c.country_code == country_code] if country_code else CITIES
     if not pool:
         pool = CITIES
-    indices = np.random.randint(0, len(pool), size=n_samples)
+    indices: list[int] = np.random.randint(0, len(pool), size=n_samples).tolist()
     sampled = [pool[i] for i in indices]
 
     street_numbers = np.random.randint(1, 9999, size=n_samples)

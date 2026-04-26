@@ -1,17 +1,25 @@
-# (code, name, applicable_transport)
+from typing import NamedTuple
+
+
+class Incoterm(NamedTuple):
+    code: str
+    name: str
+    applicable_transport: str
+
+
 # Incoterms 2020 — all 11 rules published by the International Chamber of Commerce
-INCOTERMS = [
+INCOTERMS: list[Incoterm] = [
     # Rules for any mode of transport
-    ("EXW", "Ex Works", "any"),
-    ("FCA", "Free Carrier", "any"),
-    ("CPT", "Carriage Paid To", "any"),
-    ("CIP", "Carriage and Insurance Paid To", "any"),
-    ("DAP", "Delivered at Place", "any"),
-    ("DPU", "Delivered at Place Unloaded", "any"),
-    ("DDP", "Delivered Duty Paid", "any"),
+    Incoterm("EXW", "Ex Works", "any"),
+    Incoterm("FCA", "Free Carrier", "any"),
+    Incoterm("CPT", "Carriage Paid To", "any"),
+    Incoterm("CIP", "Carriage and Insurance Paid To", "any"),
+    Incoterm("DAP", "Delivered at Place", "any"),
+    Incoterm("DPU", "Delivered at Place Unloaded", "any"),
+    Incoterm("DDP", "Delivered Duty Paid", "any"),
     # Rules for sea and inland waterway transport only
-    ("FAS", "Free Alongside Ship", "sea"),
-    ("FOB", "Free on Board", "sea"),
-    ("CFR", "Cost and Freight", "sea"),
-    ("CIF", "Cost Insurance and Freight", "sea"),
+    Incoterm("FAS", "Free Alongside Ship", "sea"),
+    Incoterm("FOB", "Free on Board", "sea"),
+    Incoterm("CFR", "Cost and Freight", "sea"),
+    Incoterm("CIF", "Cost Insurance and Freight", "sea"),
 ]

@@ -1,42 +1,50 @@
-# (code, description, category)
+from typing import NamedTuple
+
+
+class UnitOfMeasure(NamedTuple):
+    code: str
+    description: str
+    category: str
+
+
 # Codes follow UN/CEFACT Recommendation 20 and GS1 standards
-UNITS_OF_MEASURE = [
+UNITS_OF_MEASURE: list[UnitOfMeasure] = [
     # Count
-    ("EA", "Each", "count"),
-    ("BX", "Box", "count"),
-    ("CS", "Case", "count"),
-    ("PK", "Package", "count"),
-    ("ST", "Set", "count"),
-    ("PR", "Pair", "count"),
-    ("DZ", "Dozen", "count"),
-    ("PL", "Pallet", "count"),
+    UnitOfMeasure("EA", "Each", "count"),
+    UnitOfMeasure("BX", "Box", "count"),
+    UnitOfMeasure("CS", "Case", "count"),
+    UnitOfMeasure("PK", "Package", "count"),
+    UnitOfMeasure("ST", "Set", "count"),
+    UnitOfMeasure("PR", "Pair", "count"),
+    UnitOfMeasure("DZ", "Dozen", "count"),
+    UnitOfMeasure("PL", "Pallet", "count"),
     # Weight
-    ("KG", "Kilogram", "weight"),
-    ("LB", "Pound", "weight"),
-    ("MT", "Metric Ton", "weight"),
-    ("G", "Gram", "weight"),
-    ("OZ", "Ounce", "weight"),
+    UnitOfMeasure("KG", "Kilogram", "weight"),
+    UnitOfMeasure("LB", "Pound", "weight"),
+    UnitOfMeasure("MT", "Metric Ton", "weight"),
+    UnitOfMeasure("G", "Gram", "weight"),
+    UnitOfMeasure("OZ", "Ounce", "weight"),
     # Volume
-    ("LT", "Liter", "volume"),
-    ("GL", "Gallon", "volume"),
-    ("ML", "Milliliter", "volume"),
-    ("CBM", "Cubic Meter", "volume"),
+    UnitOfMeasure("LT", "Liter", "volume"),
+    UnitOfMeasure("GL", "Gallon", "volume"),
+    UnitOfMeasure("ML", "Milliliter", "volume"),
+    UnitOfMeasure("CBM", "Cubic Meter", "volume"),
     # Length / Area
-    ("M", "Meter", "length"),
-    ("FT", "Foot", "length"),
-    ("IN", "Inch", "length"),
-    ("SQM", "Square Meter", "area"),
-    ("SFT", "Square Foot", "area"),
+    UnitOfMeasure("M", "Meter", "length"),
+    UnitOfMeasure("FT", "Foot", "length"),
+    UnitOfMeasure("IN", "Inch", "length"),
+    UnitOfMeasure("SQM", "Square Meter", "area"),
+    UnitOfMeasure("SFT", "Square Foot", "area"),
     # Time
-    ("HR", "Hour", "time"),
-    ("DAY", "Day", "time"),
-    ("MO", "Month", "time"),
-    ("YR", "Year", "time"),
+    UnitOfMeasure("HR", "Hour", "time"),
+    UnitOfMeasure("DAY", "Day", "time"),
+    UnitOfMeasure("MO", "Month", "time"),
+    UnitOfMeasure("YR", "Year", "time"),
     # Service / Digital
-    ("LIC", "License", "service"),
-    ("SVC", "Service Unit", "service"),
-    ("USR", "User Seat", "service"),
-    ("API", "API Call", "digital"),
-    ("GB", "Gigabyte", "digital"),
-    ("TB", "Terabyte", "digital"),
+    UnitOfMeasure("LIC", "License", "service"),
+    UnitOfMeasure("SVC", "Service Unit", "service"),
+    UnitOfMeasure("USR", "User Seat", "service"),
+    UnitOfMeasure("API", "API Call", "digital"),
+    UnitOfMeasure("GB", "Gigabyte", "digital"),
+    UnitOfMeasure("TB", "Terabyte", "digital"),
 ]

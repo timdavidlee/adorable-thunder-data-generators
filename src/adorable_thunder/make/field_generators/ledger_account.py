@@ -33,7 +33,7 @@ def generate_ledger_accounts(
         if account_type
         else GENERAL_LEDGER_ACCOUNTS
     )
-    indices = np.random.randint(0, len(pool), size=n_samples)
+    indices: list[int] = np.random.randint(0, len(pool), size=n_samples).tolist()
     return pd.DataFrame(
         [pool[i] for i in indices], columns=["account_code", "account_name"]
     )

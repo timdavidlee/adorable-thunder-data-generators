@@ -67,7 +67,7 @@ def choose_random_date_between_dates(
         A pandas Series containing the randomly chosen dates between the start and end dates
     """
     random_days = np.random.randint(
-        0, (end_dates - start_dates).days + 1, size=len(start_dates)
+        0, (end_dates - start_dates).dt.days + 1, size=len(start_dates)
     )
     random_dates = start_dates + pd.to_timedelta(random_days, unit="D")
     return pd.Series(random_dates)
