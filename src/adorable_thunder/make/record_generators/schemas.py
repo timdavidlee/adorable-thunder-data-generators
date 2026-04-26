@@ -10,21 +10,29 @@ from pydantic import BaseModel
 class PgColumn(BaseModel):
     """
     then name will be the column name,
-    and the suffix will
+    and the suffix will any of the modifiers
     """
 
     name: str
+    data_type: str
     modifiers: str
+    llm_description: str = "N/A"
+    llm_example_values: str = "N/A"
 
     @property
     def sql_row(self):
-        return f"{self.name} {self.modifiers}"
+        return f"{self.name} {self.data_type} {self.modifiers}"
+    
+    @property
+    def llm_desc(self):
+        return f"{self.name} ({self.data_type}):\n\t{self.llm_description}\n\t{self.llm_example_values}"
 
 
 class CreatePgTableSql(BaseModel):
     pg_schema: str
     pg_table: str
     pg_columns: list[PgColumn]
+    llm_description: str | None = None
 
     @property
     def sql_statement(self) -> str:

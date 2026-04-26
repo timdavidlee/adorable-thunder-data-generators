@@ -11,7 +11,8 @@ LLM-powered agent that receives generated datasets from `make/` and evaluates ho
 ## What this module does
 
 The scrutinizer is a **read-only critic** — it does not generate or modify data. It:
-1. Accepts a sample of generated records (as a DataFrame or list of dicts)
+
+1. Queries generated records directly from a PostgreSQL database
 2. Evaluates realism across several dimensions (see below)
 3. Returns structured findings: what looks off, why, and what the generator should do differently
 
@@ -52,7 +53,7 @@ Business rules, realism benchmarks, and expected schemas for every supported flo
 ## Agent design guidance
 
 - Use the Claude API (`anthropic` SDK) with tool use for structured output
-- Pass data as a representative sample (50–200 rows), not the full dataset — the agent infers distribution from the sample
+- Query a representative sample (50–200 rows) from PostgreSQL using `TABLESAMPLE` or `ORDER BY RANDOM() LIMIT` — the agent infers distribution from the sample, not the full table
 - Prompt should include domain context (this is procurement data for a mid-sized enterprise) so the model doesn't hallucinate irrelevant standards
-- One agent call per dataset type (requests, POs, invoices, payments) — don't mix schemas in one call
+- One agent call per table/dataset type (requests, POs, invoices, payments) — don't mix schemas in one call
 - Keep the system prompt short; let the structured output schema do the heavy lifting

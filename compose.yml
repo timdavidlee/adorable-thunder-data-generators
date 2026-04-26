@@ -1,0 +1,51 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  seeder_p2p:
+    build:
+      context: .
+      dockerfile: Dockerfile.seeder
+    environment:
+      PG_HOST: postgres
+      PG_USER: ${POSTGRES_USER}
+      PG_PASSWORD: ${POSTGRES_PASSWORD}
+      PG_DBNAME: ${POSTGRES_DB}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      uv run python -m adorable_thunder.make.database.inject_into_pg
+      --flow procure_to_pay --n-samples 1000 --drop
+
+  seeder_o2c:
+    build:
+      context: .
+      dockerfile: Dockerfile.seeder
+    environment:
+      PG_HOST: postgres
+      PG_USER: ${POSTGRES_USER}
+      PG_PASSWORD: ${POSTGRES_PASSWORD}
+      PG_DBNAME: ${POSTGRES_DB}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      uv run python -m adorable_thunder.make.database.inject_into_pg
+      --flow order_to_cash --n-samples 1000 --drop
+
+volumes:
+  pgdata:

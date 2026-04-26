@@ -1,17 +1,85 @@
 # `adorable-thunder-data-generators`
 
-Data generators for synthetic datasets, for educational purposes
+Synthetic data generators for enterprise business process flows, for educational purposes. Produces realistic, relationally consistent datasets (quotes → orders → invoices → payments, etc.) and seeds them into a local Postgres database via Docker Compose.
 
-# Design Rules
+---
 
-1. For each `generator` type - create a `typer` cli that can be called individually
-2. the base `src/adorable_thunder/central_cli.py` should have a `typer` cli that inherits from all previous
-3. Avoid python row by row loops, and try to maximize `numpy` array operations to generate entire columns when possible
+## Quick Start
 
+**Prerequisites:** [uv](https://docs.astral.sh/uv/), [Docker](https://www.docker.com/)
 
-## Commands
+1. Copy the environment file and fill in credentials:
+   ```bash
+   cp .env.example .env
+   ```
 
-- Type check: `mypy src/`
-- All checks: `make check`
-- Code Formatting: `ruff format`
-- Tests `pytest`
+2. Spin up Postgres and seed it with sample data:
+   ```bash
+   docker compose up --build
+   ```
+   This starts a Postgres instance and runs seeders for `order_to_cash` and `procure_to_pay` (1,000 records each).
+
+3. Connect to the database:
+   ```
+   host: localhost  port: 5432
+   db/user/password: as set in your .env
+   ```
+
+**Running generators directly (without Docker):**
+```bash
+uv sync
+uv run python -m adorable_thunder.make.database.inject_into_pg --flow order_to_cash --n-samples 500
+uv run python -m adorable_thunder.make.database.inject_into_pg --flow procure_to_pay --n-samples 500
+```
+
+**Running tests:**
+```bash
+uv run pytest
+```
+
+---
+
+## Repository Layout
+
+```
+adorable-thunder-data-generators/
+│
+├── compose.yml                     # Docker Compose: Postgres + seeder services
+├── Dockerfile.seeder               # Image used by seeder services
+├── pyproject.toml                  # Project metadata and dependencies (uv / hatch)
+│
+├── src/adorable_thunder/
+│   │
+│   ├── central_cli.py              # Top-level CLI entrypoint
+│   │
+│   ├── make/                       # Data generation layer
+│   │   ├── cli.py                  # CLI commands for generation
+│   │   ├── common/                 # Shared math utilities
+│   │   ├── field_generators/       # Atomic field generators (address, dates, currency, …)
+│   │   ├── record_generators/      # Flow-level record generators
+│   │   │   ├── order_to_cash/      # Quotes → orders → shipments → invoices → receipts → cash apps
+│   │   │   └── procure_to_pay/     # Requests → POs → invoices → payments
+│   │   └── database/               # Postgres injection logic
+│   │
+│   ├── scrutinize/                 # AI-assisted brief review agent
+│   │   ├── agent/                  # LangGraph agent definition and schemas
+│   │   ├── tools/                  # Agent tools (dataset profile, flow brief lookup)
+│   │   └── specific_briefs/        # Per-flow scrutiny notes (one .md per flow)
+│   │
+│   └── enterprise_dataflow_briefs/ # Source-of-truth design briefs for each flow
+│       └── *.md                    # order-to-cash, procure-to-pay, forecast-to-stock, …
+│
+└── tests/
+    └── adorable_thunder/make/
+        └── field_generators/       # Unit tests for every field generator
+```
+
+### Key concepts
+
+| Term | What it is |
+|---|---|
+| **field generator** | Produces a single column value (e.g. a random address, currency code, or fiscal period) |
+| **record generator** | Assembles field generators into a full document (e.g. a sales order row) with referential consistency across tables |
+| **flow** | An end-to-end business process (e.g. `order_to_cash`) composed of several related record generators |
+| **enterprise dataflow brief** | Markdown spec describing the tables, fields, and realistic data patterns for a flow |
+| **scrutinize agent** | LangGraph agent that reviews briefs for design completeness using the Claude API |
