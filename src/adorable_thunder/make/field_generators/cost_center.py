@@ -1,5 +1,5 @@
 import numpy as np
-from adorable_thunder.reference_data.cost_centers import COST_CENTERS
+from adorable_thunder.make.reference_data.cost_centers import COST_CENTERS
 
 
 def generate_cost_center_names(n_samples: int) -> np.ndarray:

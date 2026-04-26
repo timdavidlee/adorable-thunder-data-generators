@@ -1,4 +1,4 @@
-from adorable_thunder.reference_data.company_users import COMPANY_USER_EMAILS
+from adorable_thunder.make.reference_data.company_users import COMPANY_USER_EMAILS
 import numpy as np
 
 

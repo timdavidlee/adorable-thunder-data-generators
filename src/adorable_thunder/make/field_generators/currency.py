@@ -2,7 +2,7 @@ import numpy as np
 from enum import Enum
 from pydantic import BaseModel
 
-from adorable_thunder.common.math import round_weights_and_rebalance
+from adorable_thunder.make.common.math import round_weights_and_rebalance
 
 
 class PopularCurrency(BaseModel):
@@ -39,6 +39,7 @@ TOP_CURRENCIES = [
     PopularCurrency(code="DKK", name="Danish Krone", market_cap_trillions=0.4),
 ]
 
+
 class CurrencyEnum(str, Enum):
     USD = "USD"
     EUR = "EUR"
@@ -65,6 +66,7 @@ class CurrencyEnum(str, Enum):
     ILS = "ILS"
     ZAR = "ZAR"
     DKK = "DKK"
+
 
 USD_RATES: dict[str, float] = {
     "USD": 1.0,

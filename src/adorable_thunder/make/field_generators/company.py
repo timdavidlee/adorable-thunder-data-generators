@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-from adorable_thunder.reference_data.company_names import COMPANY_NAMES
-from adorable_thunder.reference_data.company2products import COMPANY_PRODUCT_DF
+from adorable_thunder.make.reference_data.company_names import COMPANY_NAMES
+from adorable_thunder.make.reference_data.company2products import COMPANY_PRODUCT_DF
 
 
 def generate_company_names(n_samples: int) -> np.ndarray:

@@ -2,7 +2,24 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:joseparreogarcia.substack.com)",
-      "WebFetch(domain:docs.anthropic.com)"
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebSearch",
+      "WebFetch(domain:reference.langchain.com)",
+      "WebFetch(domain:docs.langchain.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(pip index *)",
+      "Bash(pip show *)",
+      "Bash(uv pip *)",
+      "Bash(uv add *)",
+      "Bash(curl -s \"https://pypi.org/pypi/deepagents/json\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d['info']['version'], d['info']['home_page'], d['info']['summary']\\)\")",
+      "Bash(uv sync *)",
+      "Bash(uv run *)",
+      "Bash(mkdir -p /Users/timlee/myrepos/adorable-thunder-data-generators/tests/adorable_thunder/make/field_generators)",
+      "Bash(touch /Users/timlee/myrepos/adorable-thunder-data-generators/tests/adorable_thunder/make/__init__.py /Users/timlee/myrepos/adorable-thunder-data-generators/tests/adorable_thunder/make/field_generators/__init__.py)",
+      "Bash(cp /Users/timlee/myrepos/adorable-thunder-data-generators/tests/adorable_thunder/generators/test_dates.py /Users/timlee/myrepos/adorable-thunder-data-generators/tests/adorable_thunder/make/field_generators/test_dates.py)",
+      "Bash(rm /Users/timlee/myrepos/adorable-thunder-data-generators/tests/adorable_thunder/generators/test_dates.py)",
+      "Bash(rmdir /Users/timlee/myrepos/adorable-thunder-data-generators/tests/adorable_thunder/generators)"
     ]
   }
 }

@@ -11,7 +11,7 @@ paths:
 - Avoid single-letter names except loop indices (`i`, `j`) and math (`x`, `y`)
 
 **Formatting**
-- Follow PEP 8; use a formatter (black/ruff) — don't debate whitespace
+- Follow PEP 8; use ruff for formatting — don't debate whitespace
 - Max line length: 100 chars
 - One blank line between methods; two between top-level definitions
 
