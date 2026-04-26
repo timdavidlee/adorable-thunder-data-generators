@@ -1,5 +1,6 @@
 import numpy as np
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.reference_data.incoterms import INCOTERMS
 
 _CODES = np.array([i[0] for i in INCOTERMS])
@@ -13,5 +14,5 @@ def generate_incoterms_codes(n_samples: int, transport_mode: str | None = None) 
     sea-only rules (FAS, FOB, CFR, CIF)."""
     if transport_mode is not None:
         pool = _CODES[_MODES == transport_mode]
-        return np.random.choice(pool, size=n_samples, replace=True)
-    return np.random.choice(_CODES, p=_WEIGHTS, size=n_samples)
+        return get_random_state().choice(pool, size=n_samples, replace=True)
+    return get_random_state().choice(_CODES, p=_WEIGHTS, size=n_samples)

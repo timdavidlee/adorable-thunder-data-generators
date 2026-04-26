@@ -15,7 +15,7 @@ class CreatePgTableSql(BaseModel):
     @property
     def sql_statement(self) -> str:
         columns = ",\n    ".join(self.pg_columns)
-        return f"CREATE TABLE {self.pg_schema}.{self.pg_table} (\n    {columns}\n);"
+        return f"CREATE TABLE IF NOT EXISTS {self.pg_schema}.{self.pg_table} (\n    {columns}\n);"
 
 
 class BaseGeneratorConfig(ABC, BaseModel):

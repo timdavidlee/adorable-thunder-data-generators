@@ -23,10 +23,13 @@
       "Bash(xargs -I{} basename {} .md)",
       "Bash(xargs basename *)",
       "Read(//private/tmp/**)",
-      "Bash(rm -rf /tmp/procure_to_pay)"
+      "Bash(rm -rf /tmp/procure_to_pay)",
+      "Edit(/.claude/skills/scrutinize-briefs/**)",
+      "Bash(gh pr *)"
     ],
     "additionalDirectories": [
-      "/Users/timlee/myrepos/adorable-thunder-data-generators/src/adorable_thunder/make/record_generators"
+      "/Users/timlee/myrepos/adorable-thunder-data-generators/src/adorable_thunder/make/record_generators",
+      "/Users/timlee/myrepos/adorable-thunder-data-generators/.claude/skills"
     ]
   }
 }

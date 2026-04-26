@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
+
 
 def assign_random_splits(
     n_samples: int,
@@ -22,12 +24,12 @@ def assign_random_splits(
         A numpy array containing the generated random splits
     """
     if dist_scaling is None:
-        splits = np.random.randint(min_splits, max_splits + 1, size=n_samples)
+        splits = get_random_state().randint(min_splits, max_splits + 1, size=n_samples)
     else:
         num_split_list = np.arange(min_splits, max_splits + 1)
         weights = 1 / np.power(num_split_list, dist_scaling)
         weights = weights / weights.sum()
-        splits = np.random.choice(num_split_list, size=n_samples, p=weights)
+        splits = get_random_state().choice(num_split_list, size=n_samples, p=weights)
     return splits
 
 
@@ -73,7 +75,7 @@ def assign_split_weights_within_original_record(
     """
 
     df = pd.DataFrame({"splits": splits})
-    df["split_weight"] = np.random.rand(len(df))
+    df["split_weight"] = get_random_state().rand(len(df))
     df["weight_rank"] = df.groupby("splits")["split_weight"].rank(method="first")
     df["split_weight"] = df.groupby("splits")["split_weight"].transform(
         lambda x: _round_and_rebalance(x / x.sum(), precision)

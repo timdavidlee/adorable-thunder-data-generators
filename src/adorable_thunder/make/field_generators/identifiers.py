@@ -2,6 +2,8 @@ from uuid import uuid4
 
 import numpy as np
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
+
 
 def generate_n_random_uuids(n: int) -> np.ndarray:
     """Generates n random UUIDs.
@@ -28,6 +30,6 @@ def generate_serial_numbers_with_prefix(
         raise ValueError("Prefix length must be less than total length")
     num_digits = total_length - len(prefix)
     max_number = 10**num_digits - 1
-    random_numbers = np.random.randint(0, max_number + 1, size=n)
+    random_numbers = get_random_state().randint(0, max_number + 1, size=n)
     serial_numbers = [f"{prefix}{str(num).zfill(num_digits)}" for num in random_numbers]
     return np.array(serial_numbers)

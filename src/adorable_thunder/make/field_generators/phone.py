@@ -1,5 +1,7 @@
 import numpy as np
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
+
 # E.164 country calling codes for countries in reference_data/countries.py
 _CALLING_CODES: dict[str, str] = {
     "US": "+1",
@@ -56,7 +58,7 @@ _CALLING_CODES: dict[str, str] = {
 def generate_phone_numbers(n_samples: int, country_code: str = "US") -> np.ndarray:
     """Generate E.164-format phone numbers for a single country."""
     calling_code = _CALLING_CODES.get(country_code, "+1")
-    numbers = np.random.randint(1_000_000_000, 9_999_999_999, size=n_samples)
+    numbers = get_random_state().randint(1_000_000_000, 9_999_999_999, size=n_samples)
     return np.array([f"{calling_code}{n}" for n in numbers])
 
 
@@ -64,7 +66,7 @@ def generate_phone_numbers_mixed(n_samples: int, country_codes: np.ndarray) -> n
     """Generate E.164-format phone numbers matching a parallel array of country codes."""
     return np.array(
         [
-            f"{_CALLING_CODES.get(cc, '+1')}{np.random.randint(1_000_000_000, 9_999_999_999)}"
+            f"{_CALLING_CODES.get(cc, '+1')}{get_random_state().randint(1_000_000_000, 9_999_999_999)}"
             for cc in country_codes
         ]
     )

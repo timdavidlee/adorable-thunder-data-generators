@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.reference_data.ledger_accounts import (
     ASSET_ACCOUNTS,
     COGS_ACCOUNTS,
@@ -34,5 +35,5 @@ def generate_ledger_accounts(
         if account_type
         else GENERAL_LEDGER_ACCOUNTS
     )
-    indices: list[int] = np.random.randint(0, len(pool), size=n_samples).tolist()
+    indices: list[int] = get_random_state().randint(0, len(pool), size=n_samples).tolist()
     return pd.DataFrame([pool[i] for i in indices], columns=["account_code", "account_name"])

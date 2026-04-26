@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.common.math import round_weights_and_rebalance
 
 
@@ -23,13 +24,13 @@ def generate_random_dates(
     """
     days = pd.to_datetime(end_date) - pd.to_datetime(start_date)
     if dist_scaling is None:
-        random_days = np.random.randint(0, days.days, n_samples)
+        random_days = get_random_state().randint(0, days.days, n_samples)
     else:
         num_day_list = np.arange(1, days.days + 1)
         weights = 1 / np.power(num_day_list, dist_scaling)
         weights = weights / weights.sum()
         weights = round_weights_and_rebalance(weights, precision=4)
-        random_days = np.random.choice(num_day_list, size=n_samples, p=weights)
+        random_days = get_random_state().choice(num_day_list, size=n_samples, p=weights)
 
     date_series = pd.Series(np.repeat(start_date, n_samples))
     random_dates = pd.to_datetime(date_series) + pd.to_timedelta(random_days, unit="D")
@@ -51,7 +52,7 @@ def extrapolate_off_dates(
     Returns:
         A pandas Series containing the extrapolated off dates
     """
-    random_days = np.random.randint(min_days, max_days + 1, size=len(pd_date_series))
+    random_days = get_random_state().randint(min_days, max_days + 1, size=len(pd_date_series))
     off_dates = pd_date_series + pd.to_timedelta(random_days, unit="D")
     return pd.Series(off_dates)
 
@@ -65,6 +66,6 @@ def choose_random_date_between_dates(start_dates: pd.Series, end_dates: pd.Serie
     Returns:
         A pandas Series containing the randomly chosen dates between the start and end dates
     """
-    random_days = np.random.randint(0, (end_dates - start_dates).dt.days + 1, size=len(start_dates))
+    random_days = get_random_state().randint(0, (end_dates - start_dates).dt.days + 1, size=len(start_dates))
     random_dates = start_dates + pd.to_timedelta(random_days, unit="D")
     return pd.Series(random_dates)

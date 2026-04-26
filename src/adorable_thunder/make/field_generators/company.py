@@ -1,12 +1,13 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.reference_data.company2products import COMPANY_PRODUCT_DF
 from adorable_thunder.make.reference_data.company_names import COMPANY_NAMES
 
 
 def generate_company_names(n_samples: int) -> np.ndarray:
-    return np.random.choice(COMPANY_NAMES, size=n_samples, replace=True)
+    return get_random_state().choice(COMPANY_NAMES, size=n_samples, replace=True)
 
 
 def generate_company_and_products(n_samples: int) -> np.ndarray:
@@ -29,7 +30,7 @@ def generate_company_and_products(n_samples: int) -> np.ndarray:
         |  9 | Pinnacle Tooling  | Pinnacle Mold Flow Analysis    |
     """
     max_id = COMPANY_PRODUCT_DF.shape[0]
-    indices = np.random.randint(0, max_id, size=n_samples)
+    indices = get_random_state().randint(0, max_id, size=n_samples)
     sampled_df: pd.DataFrame = COMPANY_PRODUCT_DF.iloc[indices].reset_index(drop=True)
     two_column_array: np.ndarray = sampled_df[["company", "product"]].to_numpy()
     return two_column_array

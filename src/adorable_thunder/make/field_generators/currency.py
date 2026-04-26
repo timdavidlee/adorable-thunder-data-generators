@@ -3,6 +3,7 @@ from enum import StrEnum
 import numpy as np
 from pydantic import BaseModel
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.common.math import round_weights_and_rebalance
 
 
@@ -39,34 +40,6 @@ TOP_CURRENCIES = [
     PopularCurrency(code="ZAR", name="South African Rand", market_cap_trillions=0.4),
     PopularCurrency(code="DKK", name="Danish Krone", market_cap_trillions=0.4),
 ]
-
-
-class CurrencyEnum(StrEnum):
-    USD = "USD"
-    EUR = "EUR"
-    CNY = "CNY"
-    JPY = "JPY"
-    INR = "INR"
-    GBP = "GBP"
-    BRL = "BRL"
-    CAD = "CAD"
-    RUB = "RUB"
-    KRW = "KRW"
-    AUD = "AUD"
-    MXN = "MXN"
-    IDR = "IDR"
-    SAR = "SAR"
-    TRY = "TRY"
-    CHF = "CHF"
-    TWD = "TWD"
-    PLN = "PLN"
-    SEK = "SEK"
-    NOK = "NOK"
-    AED = "AED"
-    THB = "THB"
-    ILS = "ILS"
-    ZAR = "ZAR"
-    DKK = "DKK"
 
 
 USD_RATES: dict[str, float] = {
@@ -115,15 +88,10 @@ def usd_to(amount: float, currency_code: str) -> float | None:
     return round(amount * rate, 2)
 
 
-class CurrencyGenerator:
-    def __init__(self) -> None:
-        self.currencies = TOP_CURRENCIES
-        self.currency_codes = [currency.code for currency in self.currencies]
-        self.market_caps = np.array([currency.market_cap_trillions for currency in self.currencies])
-        self.weights = round_weights_and_rebalance(
-            self.market_caps / self.market_caps.sum(),
-            precision=4,
-        )
+_CURRENCY_CODES = [c.code for c in TOP_CURRENCIES]
+_MARKET_CAPS = np.array([c.market_cap_trillions for c in TOP_CURRENCIES])
+_CURRENCY_WEIGHTS = round_weights_and_rebalance(_MARKET_CAPS / _MARKET_CAPS.sum(), precision=4)
 
-    def generate_currency_entries(self, n_samples: int = 10) -> np.ndarray:
-        return np.random.choice(self.currency_codes, p=self.weights, size=n_samples)
+
+def generate_currency_entries(n_samples: int = 10) -> np.ndarray:
+    return get_random_state().choice(_CURRENCY_CODES, p=_CURRENCY_WEIGHTS, size=n_samples)

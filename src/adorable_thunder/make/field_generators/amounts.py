@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.currency import USD_RATES
 
 
@@ -21,7 +22,7 @@ def generate_amounts(
     Raw materials	11.0	1.8	~$60,000
 
     """
-    amount = np.random.lognormal(mean=mu, sigma=sigma, size=n_samples)
+    amount = get_random_state().lognormal(mean=mu, sigma=sigma, size=n_samples)
     amount = np.clip(amount, min_amount, max_amount)
     amount = np.round(amount, 2)
     return amount
