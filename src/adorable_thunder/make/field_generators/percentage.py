@@ -19,9 +19,13 @@ def generate_discount_rates(n_samples: int, max_rate: float = 0.30) -> np.ndarra
 def generate_gross_margin_rates(
     n_samples: int, mean: float = 0.35, std: float = 0.12
 ) -> np.ndarray:
-    return np.round(np.clip(get_random_state().normal(loc=mean, scale=std, size=n_samples), 0.0, 1.0), 4)
+    return np.round(
+        np.clip(get_random_state().normal(loc=mean, scale=std, size=n_samples), 0.0, 1.0), 4
+    )
 
 
 def generate_budget_variance_rates(n_samples: int) -> np.ndarray:
     """Centered near 0; occasional large swings in either direction."""
-    return np.round(np.clip(get_random_state().normal(loc=0.0, scale=0.08, size=n_samples), -0.50, 0.50), 4)
+    return np.round(
+        np.clip(get_random_state().normal(loc=0.0, scale=0.08, size=n_samples), -0.50, 0.50), 4
+    )

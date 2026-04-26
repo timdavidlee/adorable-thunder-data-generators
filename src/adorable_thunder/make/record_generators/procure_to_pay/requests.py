@@ -14,7 +14,7 @@ from adorable_thunder.make.field_generators.identifiers import (
     generate_serial_numbers_with_prefix,
 )
 from adorable_thunder.make.field_generators.users import generate_user_emails
-from adorable_thunder.make.record_generators.schemas import CreatePgTableSql
+from adorable_thunder.make.record_generators.schemas import CreatePgTableSql, PgColumn
 
 _REQUEST_STATUSES = np.array(["approved", "initiated", "pending", "rejected"])
 _REQUEST_STATUS_WEIGHTS = np.array([0.55, 0.20, 0.15, 0.10])
@@ -33,16 +33,16 @@ def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
         pg_schema=pg_schema,
         pg_table=REQUESTS_TABLE_NAME,
         pg_columns=[
-            "request_id      UUID           PRIMARY KEY",
-            "document_number TEXT           NOT NULL",
-            "request_date    DATE           NOT NULL",
-            "requester_email TEXT           NOT NULL",
-            "owner_email     TEXT           NOT NULL",
-            "supplier_name   TEXT           NOT NULL",
-            "amount_usd      NUMERIC(18, 2) NOT NULL",
-            "currency_code   VARCHAR(3)     NOT NULL",
-            "cost_center     TEXT           NOT NULL",
-            "status          TEXT           NOT NULL",
+            PgColumn(name="request_id", modifiers="UUID PRIMARY KEY"),
+            PgColumn(name="document_number", modifiers="TEXT NOT NULL"),
+            PgColumn(name="request_date", modifiers="DATE NOT NULL"),
+            PgColumn(name="requester_email", modifiers="TEXT NOT NULL"),
+            PgColumn(name="owner_email", modifiers="TEXT NOT NULL"),
+            PgColumn(name="supplier_name", modifiers="TEXT NOT NULL"),
+            PgColumn(name="amount_usd", modifiers="NUMERIC(18, 2) NOT NULL"),
+            PgColumn(name="currency_code", modifiers="VARCHAR(3) NOT NULL"),
+            PgColumn(name="cost_center", modifiers="TEXT NOT NULL"),
+            PgColumn(name="status", modifiers="TEXT NOT NULL"),
         ],
     )
 

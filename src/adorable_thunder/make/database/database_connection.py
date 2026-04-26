@@ -1,4 +1,6 @@
+import pandas as pd
 import psycopg
+from psycopg.abc import Query
 from pydantic import BaseModel
 
 
@@ -17,3 +19,9 @@ class PgConnConfig(BaseModel):
             user=self.user,
             password=self.password,
         )
+
+
+async def copy_serialized_csv(df: pd.DataFrame, copy_statement: Query, cursor: psycopg.AsyncCursor):
+    buf = df.to_csv(index=False, header=False).encode()
+    async with cursor.copy(statement=copy_statement) as copy:
+        await copy.write(buf)

@@ -11,7 +11,7 @@ from adorable_thunder.make.field_generators.identifiers import (
     generate_serial_numbers_with_prefix,
 )
 from adorable_thunder.make.field_generators.percentage import generate_tax_rates
-from adorable_thunder.make.record_generators.schemas import CreatePgTableSql
+from adorable_thunder.make.record_generators.schemas import CreatePgTableSql, PgColumn
 
 _INVOICE_STATUSES = np.array(["paid", "sent", "pending", "on_hold", "cancelled", "in_dispute"])
 _INVOICE_STATUS_WEIGHTS = np.array([0.45, 0.25, 0.15, 0.08, 0.05, 0.02])
@@ -25,16 +25,16 @@ def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
         pg_schema=pg_schema,
         pg_table=INVOICES_TABLE_NAME,
         pg_columns=[
-            "invoice_id      UUID           PRIMARY KEY",
-            "order_id        UUID           NOT NULL",
-            "invoice_number  TEXT           NOT NULL",
-            "invoice_date    DATE           NOT NULL",
-            "due_date        DATE           NOT NULL",
-            "currency_code   VARCHAR(3)     NOT NULL",
-            "subtotal_amount NUMERIC(18, 2) NOT NULL",
-            "tax_amount      NUMERIC(18, 2) NOT NULL",
-            "total_amount    NUMERIC(18, 2) NOT NULL",
-            "status          TEXT           NOT NULL",
+            PgColumn(name="invoice_id", modifiers="UUID PRIMARY KEY"),
+            PgColumn(name="order_id", modifiers="UUID NOT NULL"),
+            PgColumn(name="invoice_number", modifiers="TEXT NOT NULL"),
+            PgColumn(name="invoice_date", modifiers="DATE NOT NULL"),
+            PgColumn(name="due_date", modifiers="DATE NOT NULL"),
+            PgColumn(name="currency_code", modifiers="VARCHAR(3) NOT NULL"),
+            PgColumn(name="subtotal_amount", modifiers="NUMERIC(18, 2) NOT NULL"),
+            PgColumn(name="tax_amount", modifiers="NUMERIC(18, 2) NOT NULL"),
+            PgColumn(name="total_amount", modifiers="NUMERIC(18, 2) NOT NULL"),
+            PgColumn(name="status", modifiers="TEXT NOT NULL"),
         ],
     )
 

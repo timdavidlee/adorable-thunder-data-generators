@@ -9,9 +9,10 @@ from pydantic import BaseModel
 
 class PgColumn(BaseModel):
     """
-    then name will be the column name, 
-    and the suffix will 
+    then name will be the column name,
+    and the suffix will
     """
+
     name: str
     modifiers: str
 
@@ -29,6 +30,11 @@ class CreatePgTableSql(BaseModel):
     def sql_statement(self) -> str:
         columns = ",\n    ".join([c.sql_row for c in self.pg_columns])
         return f"CREATE TABLE IF NOT EXISTS {self.pg_schema}.{self.pg_table} (\n    {columns}\n);"
+
+    @property
+    def copy_statement(self) -> str:
+        columns = ", ".join([c.name for c in self.pg_columns])
+        return f"COPY {self.pg_schema}.{self.pg_table} ({columns}) FROM stdin;"
 
 
 class BaseGeneratorConfig(ABC, BaseModel):

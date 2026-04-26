@@ -15,7 +15,7 @@ from adorable_thunder.make.field_generators.identifiers import (
 )
 from adorable_thunder.make.field_generators.percentage import generate_discount_rates
 from adorable_thunder.make.field_generators.users import generate_user_emails
-from adorable_thunder.make.record_generators.schemas import CreatePgTableSql
+from adorable_thunder.make.record_generators.schemas import CreatePgTableSql, PgColumn
 
 _QUOTE_STATUSES = np.array(["accepted", "pending", "expired", "rejected"])
 _QUOTE_STATUS_WEIGHTS = np.array([0.50, 0.25, 0.15, 0.10])
@@ -33,17 +33,17 @@ def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
         pg_schema=pg_schema,
         pg_table=QUOTES_TABLE_NAME,
         pg_columns=[
-            "quote_id        UUID           PRIMARY KEY",
-            "quote_number    TEXT           NOT NULL",
-            "quote_date      DATE           NOT NULL",
-            "expiry_date     DATE           NOT NULL",
-            "customer_name   TEXT           NOT NULL",
-            "sales_rep_email TEXT           NOT NULL",
-            "line_item_count INTEGER        NOT NULL",
-            "amount_usd      NUMERIC(18, 2) NOT NULL",
-            "currency_code   VARCHAR(3)     NOT NULL",
-            "discount_rate   NUMERIC(6, 4)  NOT NULL",
-            "status          TEXT           NOT NULL",
+            PgColumn(name="quote_id", modifiers="UUID PRIMARY KEY"),
+            PgColumn(name="quote_number", modifiers="TEXT NOT NULL"),
+            PgColumn(name="quote_date", modifiers="DATE NOT NULL"),
+            PgColumn(name="expiry_date", modifiers="DATE NOT NULL"),
+            PgColumn(name="customer_name", modifiers="TEXT NOT NULL"),
+            PgColumn(name="sales_rep_email", modifiers="TEXT NOT NULL"),
+            PgColumn(name="line_item_count", modifiers="INTEGER NOT NULL"),
+            PgColumn(name="amount_usd", modifiers="NUMERIC(18, 2) NOT NULL"),
+            PgColumn(name="currency_code", modifiers="VARCHAR(3) NOT NULL"),
+            PgColumn(name="discount_rate", modifiers="NUMERIC(6, 4) NOT NULL"),
+            PgColumn(name="status", modifiers="TEXT NOT NULL"),
         ],
     )
 

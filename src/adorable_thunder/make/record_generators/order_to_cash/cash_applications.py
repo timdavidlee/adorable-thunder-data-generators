@@ -3,7 +3,7 @@ import pandas as pd
 
 from adorable_thunder.make.field_generators.amounts import generate_amounts
 from adorable_thunder.make.field_generators.identifiers import generate_n_random_uuids
-from adorable_thunder.make.record_generators.schemas import CreatePgTableSql
+from adorable_thunder.make.record_generators.schemas import CreatePgTableSql, PgColumn
 
 CASH_APPLICATION_TABLE_NAME = "cash_applications"
 
@@ -13,11 +13,11 @@ def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
         pg_schema=pg_schema,
         pg_table=CASH_APPLICATION_TABLE_NAME,
         pg_columns=[
-            "application_id UUID           PRIMARY KEY",
-            "receipt_id     UUID           NOT NULL",
-            "invoice_id     UUID           NOT NULL",
-            "applied_amount NUMERIC(18, 2) NOT NULL",
-            "open_balance   NUMERIC(18, 2) NOT NULL",
+            PgColumn(name="application_id", modifiers="UUID PRIMARY KEY"),
+            PgColumn(name="receipt_id", modifiers="UUID NOT NULL"),
+            PgColumn(name="invoice_id", modifiers="UUID NOT NULL"),
+            PgColumn(name="applied_amount", modifiers="NUMERIC(18, 2) NOT NULL"),
+            PgColumn(name="open_balance", modifiers="NUMERIC(18, 2) NOT NULL"),
         ],
     )
 

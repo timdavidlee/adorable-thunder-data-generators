@@ -10,7 +10,7 @@ from adorable_thunder.make.field_generators.identifiers import (
     generate_n_random_uuids,
     generate_serial_numbers_with_prefix,
 )
-from adorable_thunder.make.record_generators.schemas import CreatePgTableSql
+from adorable_thunder.make.record_generators.schemas import CreatePgTableSql, PgColumn
 
 _RECEIPT_STATUSES = np.array(["posted", "pending", "on_hold", "reversed"])
 _RECEIPT_STATUS_WEIGHTS = np.array([0.60, 0.25, 0.10, 0.05])
@@ -26,14 +26,14 @@ def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
         pg_schema=pg_schema,
         pg_table=CASH_RECEIPTS_TABLE_NAME,
         pg_columns=[
-            "receipt_id      UUID           PRIMARY KEY",
-            "invoice_id      UUID           NOT NULL",
-            "receipt_number  TEXT           NOT NULL",
-            "received_date   DATE           NOT NULL",
-            "amount_received NUMERIC(18, 2) NOT NULL",
-            "currency_code   VARCHAR(3)     NOT NULL",
-            "payment_method  TEXT           NOT NULL",
-            "status          TEXT           NOT NULL",
+            PgColumn(name="receipt_id", modifiers="UUID PRIMARY KEY"),
+            PgColumn(name="invoice_id", modifiers="UUID NOT NULL"),
+            PgColumn(name="receipt_number", modifiers="TEXT NOT NULL"),
+            PgColumn(name="received_date", modifiers="DATE NOT NULL"),
+            PgColumn(name="amount_received", modifiers="NUMERIC(18, 2) NOT NULL"),
+            PgColumn(name="currency_code", modifiers="VARCHAR(3) NOT NULL"),
+            PgColumn(name="payment_method", modifiers="TEXT NOT NULL"),
+            PgColumn(name="status", modifiers="TEXT NOT NULL"),
         ],
     )
 

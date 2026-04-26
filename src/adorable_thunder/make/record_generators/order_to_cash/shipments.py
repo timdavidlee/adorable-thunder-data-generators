@@ -12,7 +12,7 @@ from adorable_thunder.make.field_generators.identifiers import (
     generate_serial_numbers_with_prefix,
 )
 from adorable_thunder.make.field_generators.incoterms import generate_incoterms_codes
-from adorable_thunder.make.record_generators.schemas import CreatePgTableSql
+from adorable_thunder.make.record_generators.schemas import CreatePgTableSql, PgColumn
 
 _SHIPMENT_STATUSES = np.array(["delivered", "in_transit", "pending", "cancelled"])
 _SHIPMENT_STATUS_WEIGHTS = np.array([0.60, 0.25, 0.10, 0.05])
@@ -26,20 +26,20 @@ def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
         pg_schema=pg_schema,
         pg_table=SHIPMENTS_TABLE_NAME,
         pg_columns=[
-            "shipment_id              UUID      PRIMARY KEY",
-            "order_id                 UUID      NOT NULL",
-            "shipment_number          TEXT      NOT NULL",
-            "ship_date                DATE      NOT NULL",
-            "carrier_scac             TEXT      NOT NULL",
-            "carrier_name             TEXT      NOT NULL",
-            "transport_mode           TEXT      NOT NULL",
-            "tracking_number          TEXT      NOT NULL",
-            "incoterms                TEXT      NOT NULL",
-            "origin_city              TEXT      NOT NULL",
-            "origin_country_code      VARCHAR(2) NOT NULL",
-            "destination_city         TEXT      NOT NULL",
-            "destination_country_code VARCHAR(2) NOT NULL",
-            "status                   TEXT      NOT NULL",
+            PgColumn(name="shipment_id", modifiers="UUID PRIMARY KEY"),
+            PgColumn(name="order_id", modifiers="UUID NOT NULL"),
+            PgColumn(name="shipment_number", modifiers="TEXT NOT NULL"),
+            PgColumn(name="ship_date", modifiers="DATE NOT NULL"),
+            PgColumn(name="carrier_scac", modifiers="TEXT NOT NULL"),
+            PgColumn(name="carrier_name", modifiers="TEXT NOT NULL"),
+            PgColumn(name="transport_mode", modifiers="TEXT NOT NULL"),
+            PgColumn(name="tracking_number", modifiers="TEXT NOT NULL"),
+            PgColumn(name="incoterms", modifiers="TEXT NOT NULL"),
+            PgColumn(name="origin_city", modifiers="TEXT NOT NULL"),
+            PgColumn(name="origin_country_code", modifiers="VARCHAR(2) NOT NULL"),
+            PgColumn(name="destination_city", modifiers="TEXT NOT NULL"),
+            PgColumn(name="destination_country_code", modifiers="VARCHAR(2) NOT NULL"),
+            PgColumn(name="status", modifiers="TEXT NOT NULL"),
         ],
     )
 
