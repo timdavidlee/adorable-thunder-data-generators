@@ -22,9 +22,7 @@ class GeneratorConfig(BaseGeneratorConfig):
     def make(self) -> dict[str, pd.DataFrame]:
         quotes = generate_quotes(self.n_samples, self.start_date, self.end_date)
 
-        active_quotes = quotes[~quotes["status"].isin(["rejected", "expired"])].reset_index(
-            drop=True
-        )
+        active_quotes = quotes[quotes["status"] == "accepted"].reset_index(drop=True)
         sales_orders = generate_sales_orders(
             len(active_quotes),
             start_date=self.start_date,
@@ -59,14 +57,13 @@ class GeneratorConfig(BaseGeneratorConfig):
 
         # invoices and the active_ship_mask subset of active_orders share the same index
         active_inv_mask = invoices["status"] != "cancelled"
-        invoice_totals = invoices.loc[active_inv_mask, "total_amount"].to_numpy()
         cash_receipts = generate_cash_receipts(
             int(active_inv_mask.sum()),
             start_date=self.start_date,
             end_date=self.end_date,
             invoice_ids=invoices.loc[active_inv_mask, "invoice_id"].to_numpy(),
             due_dates=invoices.loc[active_inv_mask, "due_date"].reset_index(drop=True),
-            invoice_totals_usd=invoice_totals,
+            invoice_totals_usd=invoices.loc[active_inv_mask, "total_amount"].to_numpy(),
             currency_codes=invoices.loc[active_inv_mask, "currency_code"].to_numpy(),
         )
 
@@ -75,7 +72,7 @@ class GeneratorConfig(BaseGeneratorConfig):
             receipt_ids=cash_receipts["receipt_id"].to_numpy(),
             invoice_ids=cash_receipts["invoice_id"].to_numpy(),
             amounts_received=cash_receipts["amount_received"].to_numpy(),
-            invoice_totals_usd=invoice_totals,
+            open_balances=cash_receipts["_open_balance"].to_numpy(),
         )
 
         return {
@@ -83,6 +80,6 @@ class GeneratorConfig(BaseGeneratorConfig):
             SALES_ORDER_TABLE_NAME: sales_orders,
             SHIPMENTS_TABLE_NAME: shipments,
             INVOICES_TABLE_NAME: invoices,
-            CASH_RECEIPTS_TABLE_NAME: cash_receipts,
+            CASH_RECEIPTS_TABLE_NAME: cash_receipts.drop(columns=["_open_balance"]),
             CASH_APPLICATION_TABLE_NAME: cash_applications,
         }

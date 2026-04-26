@@ -86,9 +86,9 @@ def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
             PgColumn(
                 name="incoterms",
                 data_type="TEXT",
-                modifiers="NOT NULL",
-                llm_description="ICC Incoterms 2020 code defining risk and cost split between buyer and seller.",
-                llm_example_values="'EXW', 'FOB', 'CIF', 'DAP', 'DDP'",
+                modifiers="",
+                llm_description="ICC Incoterms 2020 code defining risk and cost split between buyer and seller. NULL for domestic shipments (same origin and destination country).",
+                llm_example_values="'EXW', 'FOB', 'CIF', 'DAP', 'DDP', NULL",
             ),
             PgColumn(
                 name="origin_city",
@@ -148,6 +148,12 @@ def generate_shipments(
     origin_df = generate_addresses(n_samples)
     destination_df = generate_addresses(n_samples)
 
+    origin_country = origin_df["country_code"].to_numpy()
+    destination_country = destination_df["country_code"].to_numpy()
+    incoterms_codes = generate_incoterms_codes(n_samples).astype(object)
+    # Incoterms are an international trade convention; domestic shipments carry none
+    incoterms_codes[origin_country == destination_country] = None
+
     return pd.DataFrame(
         {
             "shipment_id": generate_n_random_uuids(n_samples),
@@ -162,11 +168,11 @@ def generate_shipments(
             "tracking_number": generate_serial_numbers_with_prefix(
                 n_samples, prefix="TRK-", total_length=15
             ),
-            "incoterms": generate_incoterms_codes(n_samples),
+            "incoterms": incoterms_codes,
             "origin_city": origin_df["city"].to_numpy(),
-            "origin_country_code": origin_df["country_code"].to_numpy(),
+            "origin_country_code": origin_country,
             "destination_city": destination_df["city"].to_numpy(),
-            "destination_country_code": destination_df["country_code"].to_numpy(),
+            "destination_country_code": destination_country,
             "status": np.random.choice(
                 _SHIPMENT_STATUSES, p=_SHIPMENT_STATUS_WEIGHTS, size=n_samples
             ),

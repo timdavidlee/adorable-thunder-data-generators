@@ -22,7 +22,7 @@ class PgColumn(BaseModel):
     @property
     def sql_row(self):
         return f"{self.name} {self.data_type} {self.modifiers}"
-    
+
     @property
     def llm_desc(self):
         return f"{self.name} ({self.data_type}):\n\t{self.llm_description}\n\t{self.llm_example_values}"

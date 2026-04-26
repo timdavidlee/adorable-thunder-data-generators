@@ -5,7 +5,12 @@ from deepagents import create_deep_agent  # type: ignore[reportUnknownVariableTy
 from langchain_core.messages import AIMessage, ToolMessage
 
 from adorable_thunder.scrutinize.agent.schemas import ScrutinyReport
-from adorable_thunder.scrutinize.tools import get_flow_brief, get_table_llm_annotations, list_tables, run_sql
+from adorable_thunder.scrutinize.tools import (
+    get_flow_brief,
+    get_table_llm_annotations,
+    list_tables,
+    run_sql,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +50,10 @@ Produce a ScrutinyReport. Each Finding must be specific and actionable:
 - `issue`: what is wrong and why it's unrealistic
 - `suggestion`: a concrete change the generator should make
 - `severity`: low / medium / high
+
+If no issues are found, return a ScrutinyReport with an empty findings list and a summary
+that explicitly confirms the data looks realistic (e.g. "No issues found — data looks
+realistic for a mid-to-large enterprise <flow> dataset.").
 """
 
 agent = create_deep_agent(
@@ -75,14 +84,24 @@ async def scrutinize(flow: str) -> ScrutinyReport:
         for msg in new_messages:
             if isinstance(msg, AIMessage):
                 content = msg.content
-                text = content if isinstance(content, str) else next(
-                    (b["text"] for b in content if isinstance(b, dict) and b.get("type") == "text" and b.get("text")),
-                    None,
+                text = (
+                    content
+                    if isinstance(content, str)
+                    else next(
+                        (
+                            b["text"]
+                            for b in content
+                            if isinstance(b, dict) and b.get("type") == "text" and b.get("text")
+                        ),
+                        None,
+                    )
                 )
                 if text:
                     logger.info("Agent: %s", text)
                 for tool_call in getattr(msg, "tool_calls", []):
-                    logger.info("Calling tool: %s(%s)", tool_call["name"], tool_call.get("args", {}))
+                    logger.info(
+                        "Calling tool: %s(%s)", tool_call["name"], tool_call.get("args", {})
+                    )
             elif isinstance(msg, ToolMessage):
                 logger.debug("Tool result [%s]: %.200s", msg.name, msg.content)
         final_state = state

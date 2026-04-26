@@ -15,7 +15,9 @@ app = typer.Typer()
 
 
 @app.command()
-def main(flow: str = typer.Argument(help="Enterprise flow name, e.g. procure-to-pay, order-to-cash")):
+def main(
+    flow: str = typer.Argument(help="Enterprise flow name, e.g. procure-to-pay, order-to-cash"),
+):
     report = asyncio.run(scrutinize(flow))
     typer.echo(report.model_dump_json(indent=2))
 

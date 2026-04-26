@@ -32,6 +32,7 @@ ALL_FLOW_GENERATORS: list[tuple[type[BaseGeneratorConfig], list[CreatePgTableSql
 
 _FLOW_NAMES = [config.name for config, _ in ALL_FLOW_GENERATORS]
 
+
 async def _grant_readonly_schema_access(cur: AsyncCursor, schema: str) -> None:
     await cur.execute(
         sql.SQL("GRANT USAGE ON SCHEMA {} TO ai_readonly_user").format(sql.Identifier(schema))

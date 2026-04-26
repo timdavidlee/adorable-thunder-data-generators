@@ -58,7 +58,7 @@ def generate_cash_applications(
     receipt_ids: np.ndarray | None = None,
     invoice_ids: np.ndarray | None = None,
     amounts_received: np.ndarray | None = None,
-    invoice_totals_usd: np.ndarray | None = None,
+    open_balances: np.ndarray | None = None,
 ) -> pd.DataFrame:
     if receipt_ids is None:
         receipt_ids = generate_n_random_uuids(n_samples)
@@ -76,9 +76,7 @@ def generate_cash_applications(
             sigma=1.8,
         )
 
-    if invoice_totals_usd is not None:
-        open_balances = np.round(invoice_totals_usd - applied_amounts, 2)
-    else:
+    if open_balances is None:
         open_balances = np.zeros(n_samples)
 
     return pd.DataFrame(

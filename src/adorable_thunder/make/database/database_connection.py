@@ -10,7 +10,9 @@ from pydantic import BaseModel
 class PgConnConfig(BaseModel):
     host: str = Field(default_factory=lambda: os.environ.get("PG_HOST", "localhost"))
     user: str = Field(default_factory=lambda: os.environ.get("PG_USER", "ai_readonly_user"))
-    password: str = Field(default_factory=lambda: os.environ.get("PG_PASSWORD", "not-a-password123!@#"))
+    password: str = Field(
+        default_factory=lambda: os.environ.get("PG_PASSWORD", "not-a-password123!@#")
+    )
     dbname: str = Field(default_factory=lambda: os.environ.get("PG_DBNAME", "adorable_thunder"))
     port: int = Field(default_factory=lambda: int(os.environ.get("PG_PORT", "5432")))
 

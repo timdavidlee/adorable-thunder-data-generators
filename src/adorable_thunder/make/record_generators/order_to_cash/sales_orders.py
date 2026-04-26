@@ -16,12 +16,17 @@ from adorable_thunder.make.field_generators.identifiers import (
     generate_n_random_uuids,
     generate_serial_numbers_with_prefix,
 )
-from adorable_thunder.make.field_generators.payment_terms import generate_payment_terms
 from adorable_thunder.make.field_generators.percentage import generate_discount_rates
 from adorable_thunder.make.record_generators.schemas import CreatePgTableSql, PgColumn
 
 _ORDER_STATUSES = np.array(["confirmed", "in_progress", "pending", "cancelled"])
 _ORDER_STATUS_WEIGHTS = np.array([0.55, 0.20, 0.15, 0.10])
+
+# Enterprise B2B payment terms — excludes non-standard terms (Due on Receipt, COD, Prepaid, Net 7)
+_OTC_PAYMENT_TERMS = np.array(
+    ["Net 30", "Net 45", "Net 60", "2/10 Net 30", "Net 15", "Net 90", "Net 120", "End of Month"]
+)
+_OTC_PAYMENT_TERM_WEIGHTS = np.array([0.35, 0.20, 0.15, 0.10, 0.08, 0.06, 0.04, 0.02])
 
 _NON_USD = [c for c in TOP_CURRENCIES if c.code != "USD"]
 _NON_USD_CODES = np.array([c.code for c in _NON_USD])
@@ -202,7 +207,9 @@ def generate_sales_orders(
             "net_amount_usd": net_amounts_usd,
             "currency_code": fx_df["currency_code"],
             "net_amount_local": fx_df["amount_local"],
-            "payment_terms": generate_payment_terms(n_samples),
+            "payment_terms": np.random.choice(
+                _OTC_PAYMENT_TERMS, p=_OTC_PAYMENT_TERM_WEIGHTS, size=n_samples
+            ),
             "status": np.random.choice(_ORDER_STATUSES, p=_ORDER_STATUS_WEIGHTS, size=n_samples),
         }
     )

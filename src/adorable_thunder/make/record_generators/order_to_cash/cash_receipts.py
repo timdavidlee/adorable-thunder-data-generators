@@ -1,11 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from adorable_thunder.make.field_generators.amounts import generate_amounts
-from adorable_thunder.make.field_generators.dates import (
-    extrapolate_off_dates,
-    generate_random_dates,
-)
+from adorable_thunder.make.field_generators.dates import generate_random_dates
 from adorable_thunder.make.field_generators.identifiers import (
     generate_n_random_uuids,
     generate_serial_numbers_with_prefix,
@@ -25,7 +21,7 @@ def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
     return CreatePgTableSql(
         pg_schema=pg_schema,
         pg_table=CASH_RECEIPTS_TABLE_NAME,
-        llm_description="Incoming cash payments received from customers against outstanding invoices. ~25% are partial payments (85–99% of invoice total). received_date clusters near invoice due_date.",
+        llm_description="Incoming cash payments received from customers against outstanding invoices. ~20-25% of invoices are closed by two receipts (first partial at 85-99%, second for remainder). received_date clusters near invoice due_date: ~60% within ±3 days, ~25% 1-14 days late, ~15% >14 days late.",
         pg_columns=[
             PgColumn(
                 name="receipt_id",
@@ -52,14 +48,14 @@ def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
                 name="received_date",
                 data_type="DATE",
                 modifiers="NOT NULL",
-                llm_description="Date cash was received. On-time: within 3 days of due_date; late: up to 30 days after.",
+                llm_description="Date cash was received. ~60% within ±3 days of due_date; ~25% 1-14 days late; ~15% 15-30 days late.",
                 llm_example_values="'2024-03-14', '2025-04-28'",
             ),
             PgColumn(
                 name="amount_received",
                 data_type="NUMERIC(18, 2)",
                 modifiers="NOT NULL",
-                llm_description="Amount received. Full payment = invoice total_amount; partial payments are 85–99% of that.",
+                llm_description="Amount received. Full payment = invoice total_amount; first partial receipt is 85-99% of that; second partial receipt covers the remainder.",
                 llm_example_values="'5100.00', '47000.00', '237877.50'",
             ),
             PgColumn(
@@ -87,6 +83,18 @@ def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
     )
 
 
+def _generate_received_dates(due_dates: pd.Series) -> pd.Series:
+    """3-band payment timing: 60% on-time (±3 days), 25% moderately late (4-14), 15% very late (15-30)."""
+    n = len(due_dates)
+    bands = np.random.choice([0, 1, 2], size=n, p=[0.60, 0.25, 0.15])
+    days_offset = np.where(
+        bands == 0,
+        np.random.randint(-3, 4, n),
+        np.where(bands == 1, np.random.randint(4, 15, n), np.random.randint(15, 31, n)),
+    )
+    return pd.Series(pd.to_datetime(due_dates.values) + pd.to_timedelta(days_offset, unit="D"))
+
+
 def generate_cash_receipts(
     n_samples: int,
     start_date: str = "2024-01-01",
@@ -96,51 +104,93 @@ def generate_cash_receipts(
     invoice_totals_usd: np.ndarray | None = None,
     currency_codes: np.ndarray | None = None,
 ) -> pd.DataFrame:
+    """Returns one or two receipt rows per invoice. ~20-25% of invoices get two receipts.
+
+    The returned DataFrame includes a private '_open_balance' column for use by
+    generate_cash_applications. Callers should pass cash_receipts['_open_balance']
+    as open_balances rather than recomputing from invoice totals.
+    """
     if invoice_ids is None:
         invoice_ids = generate_n_random_uuids(n_samples)
-
-    if due_dates is not None:
-        # On-time payers cluster near due_date; late payers up to 30 days over
-        received_dates = extrapolate_off_dates(due_dates, min_days=-3, max_days=30)
-    else:
-        received_dates = generate_random_dates(start_date, end_date, n_samples)
-
-    if invoice_totals_usd is not None:
-        # ~25% partial payments (85–99% of invoice total); rest are full
-        is_partial = np.random.random(n_samples) < 0.25
-        partial_rates = np.random.uniform(0.85, 0.99, n_samples)
-        amounts_received = np.where(
-            is_partial,
-            np.round(invoice_totals_usd * partial_rates, 2),
-            invoice_totals_usd,
-        )
-    else:
-        amounts_received = generate_amounts(
-            n_samples,
-            min_amount=500.0,
-            max_amount=500_000.0,
-            mu=9.5,
-            sigma=1.8,
-        )
-
     if currency_codes is None:
         currency_codes = np.full(n_samples, "USD")
 
-    return pd.DataFrame(
-        {
-            "receipt_id": generate_n_random_uuids(n_samples),
-            "invoice_id": invoice_ids,
-            "receipt_number": generate_serial_numbers_with_prefix(
-                n_samples, prefix="RCP-", total_length=12
-            ),
-            "received_date": received_dates,
-            "amount_received": amounts_received,
-            "currency_code": currency_codes,
-            "payment_method": np.random.choice(
-                _PAYMENT_METHODS, p=_PAYMENT_METHOD_WEIGHTS, size=n_samples
-            ),
-            "status": np.random.choice(
-                _RECEIPT_STATUSES, p=_RECEIPT_STATUS_WEIGHTS, size=n_samples
-            ),
-        }
+    # Decide which invoices get partial payments (two receipts)
+    is_partial = np.random.random(n_samples) < 0.225
+    partial_idx = np.where(is_partial)[0]
+    full_idx = np.where(~is_partial)[0]
+
+    rows: list[dict[str, object]] = []
+
+    # --- Full-payment invoices: one receipt each ---
+    if due_dates is not None:
+        full_dates = _generate_received_dates(due_dates.iloc[full_idx].reset_index(drop=True))
+    else:
+        full_dates = generate_random_dates(start_date, end_date, len(full_idx))
+
+    for i, inv_idx in enumerate(full_idx):
+        inv_total = float(invoice_totals_usd[inv_idx]) if invoice_totals_usd is not None else 0.0
+        rows.append(
+            {
+                "invoice_id": invoice_ids[inv_idx],
+                "received_date": full_dates.iloc[i],
+                "amount_received": round(inv_total, 2),
+                "currency_code": currency_codes[inv_idx],
+                "_open_balance": 0.0,
+            }
+        )
+
+    # --- Partial-payment invoices: two receipts each ---
+    if len(partial_idx) > 0:
+        if due_dates is not None:
+            first_dates = _generate_received_dates(
+                due_dates.iloc[partial_idx].reset_index(drop=True)
+            )
+        else:
+            first_dates = generate_random_dates(start_date, end_date, len(partial_idx))
+
+        for i, inv_idx in enumerate(partial_idx):
+            inv_total = (
+                float(invoice_totals_usd[inv_idx]) if invoice_totals_usd is not None else 0.0
+            )
+            partial_rate = np.random.uniform(0.85, 0.99)
+            first_amount = round(inv_total * partial_rate, 2)
+            remainder = round(inv_total - first_amount, 2)
+            first_date = first_dates.iloc[i]
+            # Second receipt arrives 5-15 days after the first
+            second_date = first_date + pd.Timedelta(days=int(np.random.randint(5, 16)))
+
+            rows.append(
+                {
+                    "invoice_id": invoice_ids[inv_idx],
+                    "received_date": first_date,
+                    "amount_received": first_amount,
+                    "currency_code": currency_codes[inv_idx],
+                    "_open_balance": remainder,
+                }
+            )
+            rows.append(
+                {
+                    "invoice_id": invoice_ids[inv_idx],
+                    "received_date": second_date,
+                    "amount_received": remainder,
+                    "currency_code": currency_codes[inv_idx],
+                    "_open_balance": 0.0,
+                }
+            )
+
+    df = pd.DataFrame(rows)
+    n_rows = len(df)
+
+    df.insert(0, "receipt_id", generate_n_random_uuids(n_rows))
+    df.insert(
+        2,
+        "receipt_number",
+        generate_serial_numbers_with_prefix(n_rows, prefix="RCP-", total_length=12),
     )
+    df["payment_method"] = np.random.choice(
+        _PAYMENT_METHODS, p=_PAYMENT_METHOD_WEIGHTS, size=n_rows
+    )
+    df["status"] = np.random.choice(_RECEIPT_STATUSES, p=_RECEIPT_STATUS_WEIGHTS, size=n_rows)
+
+    return df
