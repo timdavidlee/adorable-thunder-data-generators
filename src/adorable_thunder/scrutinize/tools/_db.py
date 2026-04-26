@@ -3,8 +3,8 @@ import os
 import psycopg
 
 
-def get_conn() -> psycopg.Connection:
-    return psycopg.connect(
+async def get_conn() -> psycopg.AsyncConnection:
+    return await psycopg.AsyncConnection.connect(
         host=os.environ.get("PG_HOST", "localhost"),
         port=int(os.environ.get("PG_PORT", "5432")),
         dbname=os.environ.get("PG_DBNAME", "adorable_thunder"),

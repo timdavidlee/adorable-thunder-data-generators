@@ -32,6 +32,17 @@ ALL_FLOW_GENERATORS: list[tuple[type[BaseGeneratorConfig], list[CreatePgTableSql
 
 _FLOW_NAMES = [config.name for config, _ in ALL_FLOW_GENERATORS]
 
+async def _grant_readonly_schema_access(cur: AsyncCursor, schema: str) -> None:
+    await cur.execute(
+        sql.SQL("GRANT USAGE ON SCHEMA {} TO ai_readonly_user").format(sql.Identifier(schema))
+    )
+    await cur.execute(
+        sql.SQL("GRANT SELECT ON ALL TABLES IN SCHEMA {} TO ai_readonly_user").format(
+            sql.Identifier(schema)
+        )
+    )
+
+
 async def _copy_df(cur: AsyncCursor, df: DataFrame, table: str, pg_schema: str) -> None:
     buf = io.StringIO()
     df.to_csv(buf, index=False, header=False)
@@ -70,6 +81,8 @@ async def load_flow(
                     )
                 )
             await cur.execute(create_sql_obj.sql_statement.encode())
+
+        await _grant_readonly_schema_access(cur, fgc.name)
 
         for table, df in data.items():
             typer.echo(f"  {table}: {len(df)} rows")

@@ -7,7 +7,7 @@ _VALID_FLOWS = sorted(p.stem for p in _BRIEFS_DIR.glob("*.md") if p.stem != "CLA
 
 
 @tool
-def get_flow_brief(flow: str) -> str:
+async def get_flow_brief(flow: str) -> str:
     """Return the scrutiny brief for a named enterprise flow.
 
     Call this first to load the domain-specific business rules, realism benchmarks,

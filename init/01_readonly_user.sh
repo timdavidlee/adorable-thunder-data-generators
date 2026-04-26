@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+    CREATE USER ai_readonly_user WITH PASSWORD '$AI_READONLY_PASSWORD';
+    GRANT CONNECT ON DATABASE $POSTGRES_DB TO ai_readonly_user;
+    GRANT USAGE ON SCHEMA public TO ai_readonly_user;
+    ALTER DEFAULT PRIVILEGES FOR ROLE $POSTGRES_USER IN SCHEMA public GRANT SELECT ON TABLES TO ai_readonly_user;
+EOSQL

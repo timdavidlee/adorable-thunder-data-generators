@@ -1,9 +1,13 @@
+import logging
 from typing import Any
 
 from deepagents import create_deep_agent  # type: ignore[reportUnknownVariableType]
+from langchain_core.messages import AIMessage, ToolMessage
 
 from adorable_thunder.scrutinize.agent.schemas import ScrutinyReport
-from adorable_thunder.scrutinize.tools import get_flow_brief, list_tables, run_sql
+from adorable_thunder.scrutinize.tools import get_flow_brief, get_table_llm_annotations, list_tables, run_sql
+
+logger = logging.getLogger(__name__)
 
 _SYSTEM_PROMPT = """\
 You are a data quality critic for enterprise procurement and finance datasets.
@@ -16,8 +20,10 @@ multi-currency spend, layered approval hierarchies, and dedicated procurement/fi
 
 1. Call `get_flow_brief` with the flow name to load domain-specific business rules and
    realism benchmarks.
-2. Call `list_tables` to discover the available schemas and tables.
-3. Call `run_sql` to profile distributions, sample rows, check date chains, and validate
+2. Call `get_table_llm_annotations` with the flow name to load per-column descriptions,
+   expected data types, and representative example values for every table in the flow.
+3. Call `list_tables` to discover the available schemas and tables.
+4. Call `run_sql` to profile distributions, sample rows, check date chains, and validate
    cross-field consistency. Run as many queries as needed.
 4. Reason over your findings against the brief. Flag what looks wrong.
 
@@ -43,12 +49,12 @@ Produce a ScrutinyReport. Each Finding must be specific and actionable:
 
 agent = create_deep_agent(
     system_prompt=_SYSTEM_PROMPT,
-    tools=[get_flow_brief, list_tables, run_sql],
+    tools=[get_flow_brief, get_table_llm_annotations, list_tables, run_sql],
     response_format=ScrutinyReport,
 )
 
 
-def scrutinize(flow: str) -> ScrutinyReport:
+async def scrutinize(flow: str) -> ScrutinyReport:
     """Evaluate generated records in the database for realism.
 
     Args:
@@ -58,7 +64,28 @@ def scrutinize(flow: str) -> ScrutinyReport:
         A ScrutinyReport with structured findings and a summary.
     """
     prompt = f"Evaluate the {flow} data in the database for realism."
-    result: dict[str, Any] = agent.invoke(  # type: ignore[reportUnknownMemberType]
-        {"messages": [{"role": "user", "content": prompt}]}
-    )
-    return result["structured_response"]
+    seen = 0
+    final_state: dict[str, Any] | None = None
+    async for state in agent.astream(  # type: ignore[reportUnknownMemberType]
+        {"messages": [{"role": "user", "content": prompt}]},
+        stream_mode="values",
+    ):
+        new_messages = state["messages"][seen:]
+        seen = len(state["messages"])
+        for msg in new_messages:
+            if isinstance(msg, AIMessage):
+                content = msg.content
+                text = content if isinstance(content, str) else next(
+                    (b["text"] for b in content if isinstance(b, dict) and b.get("type") == "text" and b.get("text")),
+                    None,
+                )
+                if text:
+                    logger.info("Agent: %s", text)
+                for tool_call in getattr(msg, "tool_calls", []):
+                    logger.info("Calling tool: %s(%s)", tool_call["name"], tool_call.get("args", {}))
+            elif isinstance(msg, ToolMessage):
+                logger.debug("Tool result [%s]: %.200s", msg.name, msg.content)
+        final_state = state
+
+    assert final_state is not None
+    return final_state["structured_response"]

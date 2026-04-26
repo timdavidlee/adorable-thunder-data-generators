@@ -32,7 +32,7 @@ class CreatePgTableSql(BaseModel):
     pg_schema: str
     pg_table: str
     pg_columns: list[PgColumn]
-    llm_description: str | None = None
+    llm_description: str = "N/A"
 
     @property
     def sql_statement(self) -> str:
