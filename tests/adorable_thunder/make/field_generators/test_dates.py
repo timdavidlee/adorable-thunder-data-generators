@@ -2,7 +2,7 @@ import pytest
 import pandas as pd
 from collections import Counter
 
-from adorable_thunder.generators.dates import (
+from adorable_thunder.make.field_generators.dates import (
     generate_random_dates,
     extrapolate_off_dates,
     choose_random_date_between_dates,

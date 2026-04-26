@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from adorable_thunder.make.generators.currency import USD_RATES
+from adorable_thunder.make.field_generators.currency import USD_RATES
 
 
 def generate_amounts(

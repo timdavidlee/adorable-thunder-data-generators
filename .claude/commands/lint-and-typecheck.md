@@ -1,6 +1,6 @@
 To run python linting and typechecking
 
 
-```
-uv run ruff format src/ tests/ && uv pyright src/ tests/
+```sh
+uv run ruff format src/ tests/ && uv run pyright src/ tests/
 ```

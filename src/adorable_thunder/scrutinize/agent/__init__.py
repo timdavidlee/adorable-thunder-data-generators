@@ -1,3 +1,3 @@
-from .models import Finding, ScrutinyReport
+from .schemas import Finding, ScrutinyReport
 
 __all__ = ["Finding", "ScrutinyReport"]

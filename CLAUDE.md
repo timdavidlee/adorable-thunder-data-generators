@@ -2,7 +2,12 @@
 
 Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
 
-## Project 1
+## Tooling
+
+- **Package management:** `uv` — use `uv add`, `uv run`, `uv sync`
+- **Type checking:** `pyright` — run with `uv run pyright`
+- **Linting/formatting:** `ruff` — run with `uv run ruff check` and `uv run ruff format`
+- **Testing:** `pytest` — run with `uv run pytest`
 
 ## Guidelines
 
