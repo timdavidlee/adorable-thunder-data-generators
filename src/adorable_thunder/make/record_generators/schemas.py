@@ -45,9 +45,12 @@ class CreatePgTableSql(BaseModel):
         return f"COPY {self.pg_schema}.{self.pg_table} ({columns}) FROM stdin;"
 
 
+DEFAULT_N_SAMPLES: int = 10_000
+
+
 class BaseGeneratorConfig(ABC, BaseModel):
     name: ClassVar[str]
-    n_samples: int = 1000
+    n_samples: int = DEFAULT_N_SAMPLES
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
