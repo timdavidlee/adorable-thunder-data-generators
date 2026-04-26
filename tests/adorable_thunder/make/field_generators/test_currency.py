@@ -12,11 +12,12 @@ _VALID_CODES = {c.code for c in TOP_CURRENCIES}
 
 def test_usd_to_converts_known_currency():
     result = usd_to(100.0, "EUR")
-    assert result == pytest.approx(100.0 * USD_RATES["EUR"], abs=0.01)
+    assert result == pytest.approx(100.0 * USD_RATES["EUR"], abs=0.01)  # type: ignore[reportUnknownMemberType]
 
 
 def test_usd_to_rounds_to_two_decimal_places():
     result = usd_to(1.0, "JPY")
+    assert result is not None
     assert result == round(result, 2)
 
 

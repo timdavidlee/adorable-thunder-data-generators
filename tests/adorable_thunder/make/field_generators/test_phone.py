@@ -1,5 +1,3 @@
-import re
-
 import numpy as np
 
 from adorable_thunder.make.field_generators.phone import (

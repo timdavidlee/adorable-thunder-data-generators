@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 
 from adorable_thunder.make.field_generators.amounts import (
     generate_amounts,

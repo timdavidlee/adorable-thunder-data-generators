@@ -1,5 +1,3 @@
-import numpy as np
-
 from adorable_thunder.make.reference_data.payment_terms import PAYMENT_TERMS
 
 from adorable_thunder.make.field_generators.payment_terms import generate_payment_terms

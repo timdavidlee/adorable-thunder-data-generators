@@ -17,7 +17,7 @@ def test_generate_fiscal_periods_returns_correct_length():
         ("month", r"^FY\d{4}-P\d{2}$"),
     ],
 )
-def test_generate_fiscal_periods_format(granularity: str, pattern: str):
+def test_generate_fiscal_periods_format(granularity: str, pattern: str):  # type: ignore[reportUnknownParameterType, reportMissingParameterType]
     result = generate_fiscal_periods(20, granularity=granularity)
     assert all(re.match(pattern, s) for s in result)
 

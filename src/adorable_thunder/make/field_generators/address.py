@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 
 from adorable_thunder.make.field_generators._random_state import get_random_state

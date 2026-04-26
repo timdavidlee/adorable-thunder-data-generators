@@ -1,5 +1,3 @@
-import numpy as np
-
 from adorable_thunder.make.field_generators.percentage import (
     generate_budget_variance_rates,
     generate_discount_rates,
