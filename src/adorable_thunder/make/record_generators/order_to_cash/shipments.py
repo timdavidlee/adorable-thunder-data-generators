@@ -154,6 +154,14 @@ def generate_shipments(
     # Incoterms are an international trade convention; domestic shipments carry none
     incoterms_codes[origin_country == destination_country] = None
 
+    # CIF and CFR are maritime-only (ICC Incoterms 2020); replace them on non-ocean modes
+    transport_mode_arr = carrier_df["transport_mode"].to_numpy()
+    replace_mask = np.isin(incoterms_codes, ["CIF", "CFR"]) & (transport_mode_arr != "ocean")
+    if replace_mask.any():
+        incoterms_codes[replace_mask] = np.random.choice(
+            np.array(["CIP", "CPT", "DAP", "DDP"]), size=int(replace_mask.sum())
+        )
+
     return pd.DataFrame(
         {
             "shipment_id": generate_n_random_uuids(n_samples),

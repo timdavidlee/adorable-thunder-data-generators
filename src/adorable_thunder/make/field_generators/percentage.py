@@ -13,15 +13,13 @@ def generate_tax_rates(n_samples: int) -> np.ndarray:
     return get_random_state().choice(_TAX_RATES, p=_TAX_WEIGHTS, size=n_samples)
 
 
-def generate_discount_rates(n_samples: int, max_rate: float = 0.30) -> np.ndarray:
-    """Beta(1, 5) base — ~25% of records get 0% discount; ~4% get strategic 25-30% discounts."""
-    rng = get_random_state()
-    rates = np.round(rng.beta(a=1, b=5, size=n_samples) * max_rate, 4)
-    zero_mask = rng.random(n_samples) < 0.25
-    rates[zero_mask] = 0.0
-    high_mask = (~zero_mask) & (rng.random(n_samples) < 0.04)
-    rates[high_mask] = np.round(rng.uniform(0.25, 0.30, n_samples)[high_mask], 4)
-    return rates
+_DISCOUNT_TIERS = np.array([0.00, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30])
+_DISCOUNT_WEIGHTS = np.array([0.25, 0.30, 0.20, 0.12, 0.08, 0.04, 0.01])
+
+
+def generate_discount_rates(n_samples: int) -> np.ndarray:
+    """Discrete commercial tiers matching enterprise negotiation practice."""
+    return get_random_state().choice(_DISCOUNT_TIERS, p=_DISCOUNT_WEIGHTS, size=n_samples)
 
 
 def generate_gross_margin_rates(

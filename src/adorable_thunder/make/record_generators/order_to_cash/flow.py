@@ -56,15 +56,21 @@ class GeneratorConfig(BaseGeneratorConfig):
         )
 
         # invoices and the active_ship_mask subset of active_orders share the same index
-        active_inv_mask = invoices["status"] != "cancelled"
+        # Only paid invoices have cash receipts; open invoices (sent, pending, on_hold) do not.
+        active_inv_mask = invoices["status"] == "paid"
+        orders_for_invoices = active_orders.loc[active_ship_mask].reset_index(drop=True)
         cash_receipts = generate_cash_receipts(
             int(active_inv_mask.sum()),
             start_date=self.start_date,
             end_date=self.end_date,
             invoice_ids=invoices.loc[active_inv_mask, "invoice_id"].to_numpy(),
             due_dates=invoices.loc[active_inv_mask, "due_date"].reset_index(drop=True),
+            invoice_dates=invoices.loc[active_inv_mask, "invoice_date"].reset_index(drop=True),
             invoice_totals_usd=invoices.loc[active_inv_mask, "total_amount"].to_numpy(),
             currency_codes=invoices.loc[active_inv_mask, "currency_code"].to_numpy(),
+            payment_terms=orders_for_invoices.loc[active_inv_mask, "payment_terms"]
+            .reset_index(drop=True)
+            .to_numpy(),
         )
 
         cash_applications = generate_cash_applications(

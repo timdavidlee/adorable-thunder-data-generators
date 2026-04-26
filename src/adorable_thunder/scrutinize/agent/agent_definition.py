@@ -2,7 +2,7 @@ import logging
 from typing import Any
 
 from deepagents import create_deep_agent  # type: ignore[reportUnknownVariableType]
-from langchain_core.messages import AIMessage, ToolMessage
+from langchain_core.messages import BaseMessage, AIMessage, ToolMessage
 
 from adorable_thunder.scrutinize.agent.schemas import ScrutinyReport
 from adorable_thunder.scrutinize.tools import (
@@ -56,6 +56,25 @@ that explicitly confirms the data looks realistic (e.g. "No issues found — dat
 realistic for a mid-to-large enterprise <flow> dataset.").
 """
 
+
+def get_text(msg: BaseMessage, sep: str = "") -> str:
+    """Extract text content from any message type as a single string."""
+    content: str | list[str | dict[str, object]] = msg.content  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
+
+    if isinstance(content, str):
+        return content
+
+    parts: list[str] = []
+    for item in content:
+        if isinstance(item, str):
+            parts.append(item)
+        elif isinstance(item, dict):  # pyright: ignore[reportUnnecessaryIsInstance]
+            text = item.get("text")
+            if isinstance(text, str):
+                parts.append(text)
+    return sep.join(parts)
+
+
 agent = create_deep_agent(
     system_prompt=_SYSTEM_PROMPT,
     tools=[get_flow_brief, get_table_llm_annotations, list_tables, run_sql],
@@ -83,19 +102,7 @@ async def scrutinize(flow: str) -> ScrutinyReport:
         seen = len(state["messages"])
         for msg in new_messages:
             if isinstance(msg, AIMessage):
-                content = msg.content
-                text = (
-                    content
-                    if isinstance(content, str)
-                    else next(
-                        (
-                            b["text"]
-                            for b in content
-                            if isinstance(b, dict) and b.get("type") == "text" and b.get("text")
-                        ),
-                        None,
-                    )
-                )
+                text = get_text(msg)
                 if text:
                     logger.info("Agent: %s", text)
                 for tool_call in getattr(msg, "tool_calls", []):
@@ -103,7 +110,8 @@ async def scrutinize(flow: str) -> ScrutinyReport:
                         "Calling tool: %s(%s)", tool_call["name"], tool_call.get("args", {})
                     )
             elif isinstance(msg, ToolMessage):
-                logger.debug("Tool result [%s]: %.200s", msg.name, msg.content)
+                text = get_text(msg)
+                logger.debug("Tool result [%s]: %.200s", msg.name, text)
         final_state = state
 
     assert final_state is not None

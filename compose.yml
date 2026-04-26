@@ -31,7 +31,7 @@ services:
         condition: service_healthy
     command: >
       uv run python -m adorable_thunder.make.database.inject_into_pg
-      --flow procure_to_pay --n-samples 1000 --drop
+      --flow procure_to_pay --n-samples 10_000 --drop
 
   seeder_o2c:
     build:
@@ -47,7 +47,7 @@ services:
         condition: service_healthy
     command: >
       uv run python -m adorable_thunder.make.database.inject_into_pg
-      --flow order_to_cash --n-samples 1000 --drop
+      --flow order_to_cash --n-samples 10_000 --drop
 
 volumes:
   pgdata:

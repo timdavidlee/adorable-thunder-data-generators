@@ -95,14 +95,36 @@ def _generate_received_dates(due_dates: pd.Series) -> pd.Series:
     return pd.Series(pd.to_datetime(due_dates.values) + pd.to_timedelta(days_offset, unit="D"))
 
 
+def _override_discount_dates(
+    dates: pd.Series,
+    invoice_dates: pd.Series,
+    payment_terms: np.ndarray,
+) -> pd.Series:
+    """For ~20% of 2/10 Net 30 invoices, replace received_date with invoice_date + 5-10 days
+    to simulate customers capturing the early-payment discount."""
+    is_2_10 = payment_terms == "2/10 Net 30"
+    takes_discount = is_2_10 & (np.random.random(len(dates)) < 0.20)
+    if not takes_discount.any():
+        return dates
+    early_offsets = np.random.randint(5, 11, int(takes_discount.sum()))
+    early_dates = pd.to_datetime(invoice_dates.to_numpy()[takes_discount]) + pd.to_timedelta(
+        early_offsets, unit="D"
+    )
+    result = dates.to_numpy().copy().astype("datetime64[ns]")
+    result[takes_discount] = early_dates.values
+    return pd.Series(result)
+
+
 def generate_cash_receipts(
     n_samples: int,
     start_date: str = "2024-01-01",
     end_date: str = "2025-12-31",
     invoice_ids: np.ndarray | None = None,
     due_dates: pd.Series | None = None,
+    invoice_dates: pd.Series | None = None,
     invoice_totals_usd: np.ndarray | None = None,
     currency_codes: np.ndarray | None = None,
+    payment_terms: np.ndarray | None = None,
 ) -> pd.DataFrame:
     """Returns one or two receipt rows per invoice. ~20-25% of invoices get two receipts.
 
@@ -125,6 +147,12 @@ def generate_cash_receipts(
     # --- Full-payment invoices: one receipt each ---
     if due_dates is not None:
         full_dates = _generate_received_dates(due_dates.iloc[full_idx].reset_index(drop=True))
+        if invoice_dates is not None and payment_terms is not None:
+            full_dates = _override_discount_dates(
+                full_dates,
+                invoice_dates.iloc[full_idx].reset_index(drop=True),
+                payment_terms[full_idx],
+            )
     else:
         full_dates = generate_random_dates(start_date, end_date, len(full_idx))
 
@@ -146,6 +174,12 @@ def generate_cash_receipts(
             first_dates = _generate_received_dates(
                 due_dates.iloc[partial_idx].reset_index(drop=True)
             )
+            if invoice_dates is not None and payment_terms is not None:
+                first_dates = _override_discount_dates(
+                    first_dates,
+                    invoice_dates.iloc[partial_idx].reset_index(drop=True),
+                    payment_terms[partial_idx],
+                )
         else:
             first_dates = generate_random_dates(start_date, end_date, len(partial_idx))
 

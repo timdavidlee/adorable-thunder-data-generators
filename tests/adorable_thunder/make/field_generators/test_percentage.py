@@ -18,9 +18,10 @@ def test_generate_discount_rates_within_default_bounds():
     assert (result >= 0).all() and (result <= 0.30).all()
 
 
-def test_generate_discount_rates_respects_max_rate():
-    result = generate_discount_rates(200, max_rate=0.10)
-    assert (result <= 0.10).all()
+def test_generate_discount_rates_values_from_tiers():
+    _VALID_TIERS = {0.00, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30}
+    result = generate_discount_rates(200)
+    assert all(float(r) in _VALID_TIERS for r in result)
 
 
 def test_generate_gross_margin_rates_within_unit_interval():
