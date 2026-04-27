@@ -1,3 +1,5 @@
+import unicodedata
+
 import numpy as np
 import pandas as pd
 
@@ -111,17 +113,20 @@ def generate_contacts(
     lead_first_names: np.ndarray,
     lead_last_names: np.ndarray,
 ) -> pd.DataFrame:
+    def _ascii(s: str) -> str:
+        return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode("ascii")
+
     country_codes = generate_country_codes(n_samples)
 
     company_domains = np.array(
         [
-            c.lower().replace(" ", "").replace(",", "").replace(".", "")[:12] + ".com"
+            _ascii(c).lower().replace(" ", "").replace(",", "").replace(".", "")[:12] + ".com"
             for c in lead_companies
         ]
     )
     emails = np.array(
         [
-            f"{f.lower()}.{ln.lower()}@{d}"
+            f"{_ascii(f).lower()}.{_ascii(ln).lower()}@{d}"
             for f, ln, d in zip(lead_first_names, lead_last_names, company_domains)
         ]
     )

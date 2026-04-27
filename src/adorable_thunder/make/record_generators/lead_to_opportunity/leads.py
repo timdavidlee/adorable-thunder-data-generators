@@ -1,3 +1,5 @@
+import unicodedata
+
 import numpy as np
 import pandas as pd
 
@@ -118,14 +120,17 @@ def generate_leads(
     last_names = generate_last_names(n_samples)
     companies = generate_company_names(n_samples)
 
+    def _ascii(s: str) -> str:
+        return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode("ascii")
+
     company_domains = np.array(
         [
-            c.lower().replace(" ", "").replace(",", "").replace(".", "")[:12] + ".com"
+            _ascii(c).lower().replace(" ", "").replace(",", "").replace(".", "")[:12] + ".com"
             for c in companies
         ]
     )
     emails = np.array(
-        [f"{f.lower()}.{ln.lower()}@{d}" for f, ln, d in zip(first_names, last_names, company_domains)]
+        [f"{_ascii(f).lower()}.{_ascii(ln).lower()}@{d}" for f, ln, d in zip(first_names, last_names, company_domains)]
     )
 
     n_conv = n_converted if n_converted is not None else int(n_samples * 0.20)
