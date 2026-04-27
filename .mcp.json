@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "postgres": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--project",
+        ".claude/mcp/postgres",
+        "python",
+        ".claude/mcp/postgres/server.py"
+      ],
+      "env": {
+        "PG_HOST": "localhost",
+        "PG_PORT": "5432",
+        "PG_USER": "${PG_USER}",
+        "PG_PASSWORD": "${PG_PASSWORD}",
+        "PG_DBNAME": "${PG_DBNAME}"
+      }
+    }
+  }
+}

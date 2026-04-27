@@ -116,7 +116,7 @@ def generate_requests(
     amounts_usd = generate_amounts(
         n_samples,
         min_amount=1_000.0,
-        max_amount=100_000.0,
+        max_amount=500_000.0,
         mu=10.0,
         sigma=1.5,
     )
@@ -128,6 +128,14 @@ def generate_requests(
         "USD",
     )
 
+    requester_emails = np.array(generate_user_emails(n_samples))
+    owner_emails = np.array(generate_user_emails(n_samples))
+    # No self-approval: requester and approver must be different people
+    clash = requester_emails == owner_emails
+    while clash.any():
+        owner_emails[clash] = np.array(generate_user_emails(int(clash.sum())))
+        clash = requester_emails == owner_emails
+
     return pd.DataFrame(
         {
             "request_id": generate_n_random_uuids(n_samples),
@@ -135,8 +143,8 @@ def generate_requests(
                 n_samples, prefix="REQ-", total_length=12
             ),
             "request_date": generate_random_dates(start_date, end_date, n_samples),
-            "requester_email": generate_user_emails(n_samples),
-            "owner_email": generate_user_emails(n_samples),
+            "requester_email": requester_emails,
+            "owner_email": owner_emails,
             "supplier_name": generate_company_names(n_samples),
             "amount_usd": amounts_usd,
             "currency_code": currency_codes,

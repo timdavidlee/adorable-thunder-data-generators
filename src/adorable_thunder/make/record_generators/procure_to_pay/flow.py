@@ -27,21 +27,23 @@ class GeneratorConfig(BaseGeneratorConfig):
             end_date=self.end_date,
             request_ids=active_requests["request_id"].to_numpy(),
             request_dates=active_requests["request_date"],
+            supplier_names=active_requests["supplier_name"].to_numpy(),
         )
 
-        active_pos = purchase_orders[
-            ~purchase_orders["status"].isin(["rejected", "cancelled"])
+        # Invoices are only raised against approved POs — pending/draft POs haven't
+        # been signed off yet, so no supplier invoice would exist for them.
+        approved_pos = purchase_orders[
+            purchase_orders["status"] == "approved"
         ].reset_index(drop=True)
         invoices = generate_invoices(
-            len(active_pos),
+            len(approved_pos),
             start_date=self.start_date,
             end_date=self.end_date,
-            po_ids=active_pos["po_id"].to_numpy(),
-            po_dates=active_pos["po_date"],
-            po_amounts_usd=active_pos["total_amount_usd"].to_numpy(),
+            po_ids=approved_pos["po_id"].to_numpy(),
+            po_dates=approved_pos["po_date"],
+            po_amounts_usd=approved_pos["total_amount_usd"].to_numpy(),
         )
 
-        # active_pos and invoices share the same 0-based index, so the mask aligns both
         active_inv_mask = invoices["status"] != "cancelled"
         payments = generate_payments(
             int(active_inv_mask.sum()),
@@ -50,7 +52,7 @@ class GeneratorConfig(BaseGeneratorConfig):
             invoice_ids=invoices.loc[active_inv_mask, "invoice_id"].to_numpy(),
             due_dates=invoices.loc[active_inv_mask, "due_date"].reset_index(drop=True),
             invoice_amounts_usd=invoices.loc[active_inv_mask, "amount_invoiced"].to_numpy(),
-            currency_codes=active_pos.loc[active_inv_mask, "currency_code"].to_numpy(),
+            currency_codes=approved_pos.loc[active_inv_mask, "currency_code"].to_numpy(),
         )
 
         return {

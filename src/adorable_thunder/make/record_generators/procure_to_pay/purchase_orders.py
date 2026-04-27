@@ -124,11 +124,13 @@ def generate_purchase_orders(
     end_date: str = "2025-12-31",
     request_ids: np.ndarray | None = None,
     request_dates: pd.Series | None = None,
+    supplier_names: np.ndarray | None = None,
 ) -> pd.DataFrame:
     """Generate a DataFrame of synthetic purchase order records.
 
     Pass request_ids/request_dates from an upstream requests stage to link POs
     to requests and enforce the date chain (po_date = request_date + 1–10 days).
+    Pass supplier_names to carry the requested supplier through to the PO.
     When None, placeholder UUIDs and random dates within start_date/end_date are used.
     """
     if request_ids is None:
@@ -164,8 +166,12 @@ def generate_purchase_orders(
                 n_samples, prefix="PO-", total_length=10
             ),
             "po_date": po_dates,
-            "supplier_name": generate_company_names(n_samples),
-            "line_item_count": np.random.randint(1, 11, size=n_samples),
+            "supplier_name": supplier_names if supplier_names is not None else generate_company_names(n_samples),
+            "line_item_count": np.random.choice(
+                np.arange(1, 11),
+                p=[0.30, 0.25, 0.18, 0.12, 0.07, 0.04, 0.02, 0.01, 0.005, 0.005],
+                size=n_samples,
+            ),
             "total_amount_usd": fx_df["amount_usd"],
             "currency_code": fx_df["currency_code"],
             "total_amount_local": fx_df["amount_local"],

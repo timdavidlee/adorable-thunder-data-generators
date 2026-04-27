@@ -98,8 +98,13 @@ def generate_payments(
         invoice_ids = generate_n_random_uuids(n_samples)
 
     if due_dates is not None:
-        # On-time payers cluster near due_date; late payers up to 30 days over
-        payment_dates = extrapolate_off_dates(due_dates, min_days=-3, max_days=30)
+        # 85% on-time (within ±3 days of due_date), 15% late (+4 to +30 days)
+        n = len(due_dates)
+        late_mask = np.random.random(n) < 0.15
+        on_time_days = np.random.randint(-3, 4, size=n)
+        late_days = np.random.randint(4, 31, size=n)
+        random_days = np.where(late_mask, late_days, on_time_days)
+        payment_dates = pd.Series(due_dates.values + pd.to_timedelta(random_days, unit="D"))
     else:
         payment_dates = generate_random_dates(start_date, end_date, n_samples)
 
