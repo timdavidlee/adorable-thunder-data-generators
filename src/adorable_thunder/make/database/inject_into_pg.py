@@ -8,6 +8,18 @@ from pandas import DataFrame
 from psycopg import AsyncCursor, sql
 
 from adorable_thunder.make.database.database_connection import PgConnConfig
+from adorable_thunder.make.record_generators.campaign_to_conversion import (
+    FLOW_SCHEMAS as C2C_FLOW_SCHEMAS,
+)
+from adorable_thunder.make.record_generators.campaign_to_conversion import (
+    GeneratorConfig as C2CGeneratorConfig,
+)
+from adorable_thunder.make.record_generators.lead_to_opportunity import (
+    FLOW_SCHEMAS as L2O_FLOW_SCHEMAS,
+)
+from adorable_thunder.make.record_generators.lead_to_opportunity import (
+    GeneratorConfig as L2OGeneratorConfig,
+)
 from adorable_thunder.make.record_generators.order_to_cash import (
     FLOW_SCHEMAS as O2C_FLOW_SCHEMAS,
 )
@@ -20,12 +32,6 @@ from adorable_thunder.make.record_generators.procure_to_pay import (
 from adorable_thunder.make.record_generators.procure_to_pay import (
     GeneratorConfig as P2PGeneratorConfig,
 )
-from adorable_thunder.make.record_generators.campaign_to_conversion import (
-    FLOW_SCHEMAS as C2C_FLOW_SCHEMAS,
-)
-from adorable_thunder.make.record_generators.campaign_to_conversion import (
-    GeneratorConfig as C2CGeneratorConfig,
-)
 from adorable_thunder.make.record_generators.schemas import (
     BaseGeneratorConfig,
     CreatePgTableSql,
@@ -35,6 +41,7 @@ ALL_FLOW_GENERATORS: list[tuple[type[BaseGeneratorConfig], list[CreatePgTableSql
     (O2CGeneratorConfig, O2C_FLOW_SCHEMAS),
     (P2PGeneratorConfig, P2P_FLOW_SCHEMAS),
     (C2CGeneratorConfig, C2C_FLOW_SCHEMAS),
+    (L2OGeneratorConfig, L2O_FLOW_SCHEMAS),
 ]
 
 _FLOW_NAMES = [config.name for config, _ in ALL_FLOW_GENERATORS]
