@@ -2,9 +2,12 @@ import os
 
 import pandas as pd
 import psycopg
+from dotenv import load_dotenv
 from psycopg.abc import Query
 from pydantic import Field
 from pydantic import BaseModel
+
+load_dotenv()
 
 
 class PgConnConfig(BaseModel):
