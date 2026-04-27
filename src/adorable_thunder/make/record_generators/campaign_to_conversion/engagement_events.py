@@ -83,12 +83,14 @@ def generate_engagement_events(
     # Engagements happen 0–2 days after impression
     engagement_dates = extrapolate_off_dates(impression_dates, min_days=0, max_days=2)
 
-    return pd.DataFrame({
-        "event_id": generate_n_random_uuids(n_samples),
-        "impression_id": impression_ids,
-        "campaign_id": campaign_ids,
-        "contact_id": contact_ids,
-        "event_type": np.random.choice(_EVENT_TYPES, p=_EVENT_TYPE_WEIGHTS, size=n_samples),
-        "engagement_date": engagement_dates,
-        "device": np.random.choice(_DEVICES, p=_DEVICE_WEIGHTS, size=n_samples),
-    })
+    return pd.DataFrame(
+        {
+            "event_id": generate_n_random_uuids(n_samples),
+            "impression_id": impression_ids,
+            "campaign_id": campaign_ids,
+            "contact_id": contact_ids,
+            "event_type": np.random.choice(_EVENT_TYPES, p=_EVENT_TYPE_WEIGHTS, size=n_samples),
+            "engagement_date": engagement_dates,
+            "device": np.random.choice(_DEVICES, p=_DEVICE_WEIGHTS, size=n_samples),
+        }
+    )

@@ -8,9 +8,9 @@ from adorable_thunder.make.field_generators.identifiers import (
 )
 from adorable_thunder.make.record_generators.schemas import CreatePgTableSql, PgColumn
 
-_FORM_TYPES = np.array([
-    "contact_form", "demo_request", "whitepaper_download", "webinar_registration", "free_trial"
-])
+_FORM_TYPES = np.array(
+    ["contact_form", "demo_request", "whitepaper_download", "webinar_registration", "free_trial"]
+)
 _FORM_TYPE_WEIGHTS = np.array([0.25, 0.25, 0.20, 0.20, 0.10])
 
 _SOURCE_MEDIUMS = np.array(["cpc", "organic", "email", "social", "referral", "direct"])
@@ -87,16 +87,18 @@ def generate_lead_captures(
     # Leads captured 0–3 days after engagement
     captured_dates = extrapolate_off_dates(engagement_dates, min_days=0, max_days=3)
 
-    return pd.DataFrame({
-        "lead_id": generate_n_random_uuids(n_samples),
-        "lead_number": generate_serial_numbers_with_prefix(
-            n_samples, prefix="LEAD-", total_length=11
-        ),
-        "campaign_id": campaign_ids,
-        "contact_id": contact_ids,
-        "form_type": np.random.choice(_FORM_TYPES, p=_FORM_TYPE_WEIGHTS, size=n_samples),
-        "captured_date": captured_dates,
-        "source_medium": np.random.choice(
-            _SOURCE_MEDIUMS, p=_SOURCE_MEDIUM_WEIGHTS, size=n_samples
-        ),
-    })
+    return pd.DataFrame(
+        {
+            "lead_id": generate_n_random_uuids(n_samples),
+            "lead_number": generate_serial_numbers_with_prefix(
+                n_samples, prefix="LEAD-", total_length=11
+            ),
+            "campaign_id": campaign_ids,
+            "contact_id": contact_ids,
+            "form_type": np.random.choice(_FORM_TYPES, p=_FORM_TYPE_WEIGHTS, size=n_samples),
+            "captured_date": captured_dates,
+            "source_medium": np.random.choice(
+                _SOURCE_MEDIUMS, p=_SOURCE_MEDIUM_WEIGHTS, size=n_samples
+            ),
+        }
+    )

@@ -5,10 +5,18 @@ from adorable_thunder.make.field_generators.dates import choose_random_date_betw
 from adorable_thunder.make.field_generators.identifiers import generate_n_random_uuids
 from adorable_thunder.make.record_generators.schemas import CreatePgTableSql, PgColumn
 
-_PLACEMENTS = np.array([
-    "feed", "sidebar", "banner", "search_results", "email_body",
-    "sponsored_content", "pre_roll", "homepage_hero",
-])
+_PLACEMENTS = np.array(
+    [
+        "feed",
+        "sidebar",
+        "banner",
+        "search_results",
+        "email_body",
+        "sponsored_content",
+        "pre_roll",
+        "homepage_hero",
+    ]
+)
 
 IMPRESSIONS_TABLE_NAME = "impressions"
 
@@ -80,13 +88,15 @@ def generate_impressions(
     n = len(campaign_ids)
     impression_dates = choose_random_date_between_dates(campaign_starts, campaign_ends)
 
-    return pd.DataFrame({
-        "impression_id": generate_n_random_uuids(n),
-        "campaign_id": campaign_ids,
-        "contact_id": generate_n_random_uuids(contact_pool_size)[
-            np.random.randint(0, contact_pool_size, size=n)
-        ],
-        "impression_date": impression_dates,
-        "channel": campaign_channels,
-        "placement": np.random.choice(_PLACEMENTS, size=n),
-    })
+    return pd.DataFrame(
+        {
+            "impression_id": generate_n_random_uuids(n),
+            "campaign_id": campaign_ids,
+            "contact_id": generate_n_random_uuids(contact_pool_size)[
+                np.random.randint(0, contact_pool_size, size=n)
+            ],
+            "impression_date": impression_dates,
+            "channel": campaign_channels,
+            "placement": np.random.choice(_PLACEMENTS, size=n),
+        }
+    )

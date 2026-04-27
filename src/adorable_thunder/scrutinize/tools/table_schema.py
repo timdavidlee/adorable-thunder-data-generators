@@ -17,7 +17,7 @@ def _get_schemas(flow: str) -> list[CreatePgTableSql] | None:
 
 
 def _render(schemas: list[CreatePgTableSql]) -> str:
-    parts = []
+    parts: list[str] = []
     for s in schemas:
         header = f"## {s.pg_schema}.{s.pg_table}\n{s.llm_description}"
         cols = "\n".join(f"  {c.llm_desc}" for c in s.pg_columns)

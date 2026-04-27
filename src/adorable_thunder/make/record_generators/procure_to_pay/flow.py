@@ -32,9 +32,9 @@ class GeneratorConfig(BaseGeneratorConfig):
 
         # Invoices are only raised against approved POs — pending/draft POs haven't
         # been signed off yet, so no supplier invoice would exist for them.
-        approved_pos = purchase_orders[
-            purchase_orders["status"] == "approved"
-        ].reset_index(drop=True)
+        approved_pos = purchase_orders[purchase_orders["status"] == "approved"].reset_index(
+            drop=True
+        )
         invoices = generate_invoices(
             len(approved_pos),
             start_date=self.start_date,

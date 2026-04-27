@@ -6,14 +6,14 @@ from adorable_thunder.make.field_generators.dates import extrapolate_off_dates
 from adorable_thunder.make.field_generators.identifiers import generate_n_random_uuids
 from adorable_thunder.make.record_generators.schemas import CreatePgTableSql, PgColumn
 
-_CONVERSION_TYPES = np.array([
-    "opportunity_created", "trial_started", "purchase", "demo_completed", "contract_signed"
-])
+_CONVERSION_TYPES = np.array(
+    ["opportunity_created", "trial_started", "purchase", "demo_completed", "contract_signed"]
+)
 _CONVERSION_TYPE_WEIGHTS = np.array([0.35, 0.25, 0.20, 0.15, 0.05])
 
-_ATTRIBUTION_MODELS = np.array([
-    "FIRST_TOUCH", "LAST_TOUCH", "LINEAR", "TIME_DECAY", "POSITION_BASED"
-])
+_ATTRIBUTION_MODELS = np.array(
+    ["FIRST_TOUCH", "LAST_TOUCH", "LINEAR", "TIME_DECAY", "POSITION_BASED"]
+)
 _ATTRIBUTION_MODEL_WEIGHTS = np.array([0.20, 0.25, 0.20, 0.20, 0.15])
 
 CONVERSIONS_TABLE_NAME = "conversions"
@@ -95,16 +95,18 @@ def generate_conversions(
         sigma=1.5,
     )
 
-    return pd.DataFrame({
-        "conversion_id": generate_n_random_uuids(n_samples),
-        "lead_id": lead_ids,
-        "campaign_id": campaign_ids,
-        "conversion_date": conversion_dates,
-        "conversion_type": np.random.choice(
-            _CONVERSION_TYPES, p=_CONVERSION_TYPE_WEIGHTS, size=n_samples
-        ),
-        "revenue_attributed": np.round(revenue, 2),
-        "attribution_model": np.random.choice(
-            _ATTRIBUTION_MODELS, p=_ATTRIBUTION_MODEL_WEIGHTS, size=n_samples
-        ),
-    })
+    return pd.DataFrame(
+        {
+            "conversion_id": generate_n_random_uuids(n_samples),
+            "lead_id": lead_ids,
+            "campaign_id": campaign_ids,
+            "conversion_date": conversion_dates,
+            "conversion_type": np.random.choice(
+                _CONVERSION_TYPES, p=_CONVERSION_TYPE_WEIGHTS, size=n_samples
+            ),
+            "revenue_attributed": np.round(revenue, 2),
+            "attribution_model": np.random.choice(
+                _ATTRIBUTION_MODELS, p=_ATTRIBUTION_MODEL_WEIGHTS, size=n_samples
+            ),
+        }
+    )

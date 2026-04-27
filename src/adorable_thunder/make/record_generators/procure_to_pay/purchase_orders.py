@@ -166,7 +166,9 @@ def generate_purchase_orders(
                 n_samples, prefix="PO-", total_length=10
             ),
             "po_date": po_dates,
-            "supplier_name": supplier_names if supplier_names is not None else generate_company_names(n_samples),
+            "supplier_name": supplier_names
+            if supplier_names is not None
+            else generate_company_names(n_samples),
             "line_item_count": np.random.choice(
                 np.arange(1, 11),
                 p=[0.30, 0.25, 0.18, 0.12, 0.07, 0.04, 0.02, 0.01, 0.005, 0.005],

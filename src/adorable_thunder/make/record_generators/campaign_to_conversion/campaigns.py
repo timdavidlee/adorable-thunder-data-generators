@@ -15,14 +15,16 @@ _CHANNEL_WEIGHTS = np.array([0.25, 0.20, 0.20, 0.15, 0.12, 0.08])
 _STATUSES = np.array(["active", "completed", "paused", "draft"])
 _STATUS_WEIGHTS = np.array([0.40, 0.35, 0.15, 0.10])
 
-_AUDIENCES = np.array([
-    "Enterprise Decision Makers",
-    "SMB Owners",
-    "Technical Practitioners",
-    "Finance Leaders",
-    "Marketing Professionals",
-    "Procurement Managers",
-])
+_AUDIENCES = np.array(
+    [
+        "Enterprise Decision Makers",
+        "SMB Owners",
+        "Technical Practitioners",
+        "Finance Leaders",
+        "Marketing Professionals",
+        "Procurement Managers",
+    ]
+)
 
 CAMPAIGNS_TABLE_NAME = "campaigns"
 
@@ -121,23 +123,29 @@ def generate_campaigns(
                     generate_amounts(n_samples, min_amount=50, max_amount=200, mu=4.8, sigma=0.4),
                     np.where(
                         np.isin(channels, ["Organic Search"]),
-                        generate_amounts(n_samples, min_amount=30, max_amount=120, mu=4.2, sigma=0.4),
-                        generate_amounts(n_samples, min_amount=20, max_amount=100, mu=3.9, sigma=0.4),
+                        generate_amounts(
+                            n_samples, min_amount=30, max_amount=120, mu=4.2, sigma=0.4
+                        ),
+                        generate_amounts(
+                            n_samples, min_amount=20, max_amount=100, mu=3.9, sigma=0.4
+                        ),
                     ),
                 ),
             ),
         ),
     )
 
-    return pd.DataFrame({
-        "campaign_id": generate_n_random_uuids(n_samples),
-        "campaign_name": generate_serial_numbers_with_prefix(
-            n_samples, prefix="CAMP-", total_length=12
-        ),
-        "channel": channels,
-        "start_date": campaign_starts,
-        "end_date": campaign_ends,
-        "budget_usd": np.round(budgets, 2),
-        "target_audience": np.random.choice(_AUDIENCES, size=n_samples),
-        "status": np.random.choice(_STATUSES, p=_STATUS_WEIGHTS, size=n_samples),
-    })
+    return pd.DataFrame(
+        {
+            "campaign_id": generate_n_random_uuids(n_samples),
+            "campaign_name": generate_serial_numbers_with_prefix(
+                n_samples, prefix="CAMP-", total_length=12
+            ),
+            "channel": channels,
+            "start_date": campaign_starts,
+            "end_date": campaign_ends,
+            "budget_usd": np.round(budgets, 2),
+            "target_audience": np.random.choice(_AUDIENCES, size=n_samples),
+            "status": np.random.choice(_STATUSES, p=_STATUS_WEIGHTS, size=n_samples),
+        }
+    )

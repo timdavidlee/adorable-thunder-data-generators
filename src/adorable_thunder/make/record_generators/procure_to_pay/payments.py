@@ -5,7 +5,6 @@ from adorable_thunder.make.common.math import round_weights_and_rebalance
 from adorable_thunder.make.field_generators.amounts import generate_amounts
 from adorable_thunder.make.field_generators.currency import TOP_CURRENCIES
 from adorable_thunder.make.field_generators.dates import (
-    extrapolate_off_dates,
     generate_random_dates,
 )
 from adorable_thunder.make.field_generators.identifiers import generate_n_random_uuids
@@ -104,7 +103,7 @@ def generate_payments(
         on_time_days = np.random.randint(-3, 4, size=n)
         late_days = np.random.randint(4, 31, size=n)
         random_days = np.where(late_mask, late_days, on_time_days)
-        payment_dates = pd.Series(due_dates.values + pd.to_timedelta(random_days, unit="D"))
+        payment_dates = due_dates + pd.to_timedelta(random_days, unit="D")
     else:
         payment_dates = generate_random_dates(start_date, end_date, n_samples)
 

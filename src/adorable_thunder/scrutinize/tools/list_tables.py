@@ -28,7 +28,7 @@ async def list_tables() -> str:
     for schema, table, column, dtype in rows:
         tables[f"{schema}.{table}"].append(f"{column} ({dtype})")
 
-    lines = []
+    lines: list[str] = []
     for table_name, columns in sorted(tables.items()):
         lines.append(table_name)
         for col in columns:
