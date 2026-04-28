@@ -38,6 +38,12 @@ from adorable_thunder.make.record_generators.procure_to_pay import (
 from adorable_thunder.make.record_generators.procure_to_pay import (
     GeneratorConfig as P2PGeneratorConfig,
 )
+from adorable_thunder.make.record_generators.quote_to_cash import (
+    FLOW_SCHEMAS as Q2C_FLOW_SCHEMAS,
+)
+from adorable_thunder.make.record_generators.quote_to_cash import (
+    GeneratorConfig as Q2CGeneratorConfig,
+)
 from adorable_thunder.make.record_generators.schemas import (
     BaseGeneratorConfig,
     CreatePgTableSql,
@@ -49,6 +55,7 @@ ALL_FLOW_GENERATORS: list[tuple[type[BaseGeneratorConfig], list[CreatePgTableSql
     (C2CGeneratorConfig, C2C_FLOW_SCHEMAS),
     (L2OGeneratorConfig, L2O_FLOW_SCHEMAS),
     (F2SGeneratorConfig, F2S_FLOW_SCHEMAS),
+    (Q2CGeneratorConfig, Q2C_FLOW_SCHEMAS),
 ]
 
 _FLOW_NAMES = [config.name for config, _ in ALL_FLOW_GENERATORS]
