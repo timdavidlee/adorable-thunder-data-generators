@@ -14,6 +14,12 @@ from adorable_thunder.make.record_generators.campaign_to_conversion import (
 from adorable_thunder.make.record_generators.campaign_to_conversion import (
     GeneratorConfig as C2CGeneratorConfig,
 )
+from adorable_thunder.make.record_generators.forecast_to_stock import (
+    FLOW_SCHEMAS as F2S_FLOW_SCHEMAS,
+)
+from adorable_thunder.make.record_generators.forecast_to_stock import (
+    GeneratorConfig as F2SGeneratorConfig,
+)
 from adorable_thunder.make.record_generators.lead_to_opportunity import (
     FLOW_SCHEMAS as L2O_FLOW_SCHEMAS,
 )
@@ -42,6 +48,7 @@ ALL_FLOW_GENERATORS: list[tuple[type[BaseGeneratorConfig], list[CreatePgTableSql
     (P2PGeneratorConfig, P2P_FLOW_SCHEMAS),
     (C2CGeneratorConfig, C2C_FLOW_SCHEMAS),
     (L2OGeneratorConfig, L2O_FLOW_SCHEMAS),
+    (F2SGeneratorConfig, F2S_FLOW_SCHEMAS),
 ]
 
 _FLOW_NAMES = [config.name for config, _ in ALL_FLOW_GENERATORS]

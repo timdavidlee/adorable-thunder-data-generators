@@ -130,7 +130,10 @@ def generate_leads(
         ]
     )
     emails = np.array(
-        [f"{_ascii(f).lower()}.{_ascii(ln).lower()}@{d}" for f, ln, d in zip(first_names, last_names, company_domains)]
+        [
+            f"{_ascii(f).lower()}.{_ascii(ln).lower()}@{d}"
+            for f, ln, d in zip(first_names, last_names, company_domains)
+        ]
     )
 
     n_conv = n_converted if n_converted is not None else int(n_samples * 0.20)

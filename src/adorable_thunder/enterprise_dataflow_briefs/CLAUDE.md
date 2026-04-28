@@ -17,3 +17,10 @@ Both `make/` (generation) and `scrutinize/` (realism evaluation) treat these as 
 @lead-to-opportunity.md
 @campaign-to-conversion.md
 @quote-to-cash.md
+@consult-to-install.md
+@discover-to-subscribe.md
+@request-to-delivery.md
+@signup-to-renewal.md
+@cart-to-fulfillment.md
+@trial-to-membership.md
+@install-to-retention.md

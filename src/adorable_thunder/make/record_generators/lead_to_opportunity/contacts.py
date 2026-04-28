@@ -114,13 +114,16 @@ def generate_contacts(
     lead_last_names: np.ndarray,
 ) -> pd.DataFrame:
     def _ascii(s: str) -> str:
-        return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode("ascii")
+        return (
+            unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode("ascii")
+        )
 
     country_codes = generate_country_codes(n_samples)
 
     company_domains = np.array(
         [
-            _ascii(c).lower().replace(" ", "").replace(",", "").replace(".", "")[:12] + ".com"
+            _ascii(c).lower().replace(" ", "").replace(",", "").replace(".", "")[:12]
+            + ".com"
             for c in lead_companies
         ]
     )

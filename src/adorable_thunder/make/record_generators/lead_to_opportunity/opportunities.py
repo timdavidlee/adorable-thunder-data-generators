@@ -11,7 +11,15 @@ from adorable_thunder.make.field_generators.users import generate_user_emails
 from adorable_thunder.make.record_generators.schemas import CreatePgTableSql, PgColumn
 
 _STAGES = np.array(
-    ["Prospecting", "Qualification", "Discovery", "Proposal", "Negotiation", "Closed Won", "Closed Lost"]
+    [
+        "Prospecting",
+        "Qualification",
+        "Discovery",
+        "Proposal",
+        "Negotiation",
+        "Closed Won",
+        "Closed Lost",
+    ]
 )
 # Distribution: cluster in Qualification/Proposal; few in Negotiation; 20% closed (6% Won, 14% Lost)
 _STAGE_WEIGHTS = np.array([0.08, 0.28, 0.22, 0.17, 0.05, 0.06, 0.14])
@@ -121,7 +129,9 @@ def generate_opportunities(
     stages = np.random.choice(_STAGES, p=_STAGE_WEIGHTS, size=n_samples)
     probabilities = np.array([_STAGE_PROBABILITY[s] for s in stages])
 
-    segments = np.random.choice(["smb", "midmarket", "enterprise"], p=_SEGMENT_WEIGHTS, size=n_samples)
+    segments = np.random.choice(
+        ["smb", "midmarket", "enterprise"], p=_SEGMENT_WEIGHTS, size=n_samples
+    )
     deal_values = np.where(
         segments == "enterprise",
         generate_amounts(n_samples, min_amount=500_000, max_amount=5_000_000, mu=14.0, sigma=0.7),
