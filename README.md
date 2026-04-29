@@ -65,7 +65,8 @@ adorable-thunder-data-generators/
 │   │   │   ├── lead_to_opportunity/    # Leads → contacts → opportunities → quotes → contracts
 │   │   │   ├── order_to_cash/          # Quotes → orders → shipments → invoices → receipts → cash apps
 │   │   │   ├── procure_to_pay/         # Requests → POs → invoices → payments
-│   │   │   └── quote_to_cash/          # Subscriptions → contracts → recurring invoices → renewals
+│   │   │   ├── quote_to_cash/          # Subscriptions → contracts → recurring invoices → renewals
+│   │   │   └── warehouse_management/   # Inbound shipments → receipts → storage → picks → outbound shipments → cycle counts
 │   │   │   #   each flow dir contains: stage *.py files, flow.py, __init__.py, briefs/TODO.md
 │   │   └── database/               # Postgres injection logic
 │   │
