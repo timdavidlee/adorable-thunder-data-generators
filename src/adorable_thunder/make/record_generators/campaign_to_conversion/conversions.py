@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.amounts import generate_amounts
 from adorable_thunder.make.field_generators.dates import extrapolate_off_dates
 from adorable_thunder.make.field_generators.identifiers import generate_n_random_uuids
@@ -101,11 +102,11 @@ def generate_conversions(
             "lead_id": lead_ids,
             "campaign_id": campaign_ids,
             "conversion_date": conversion_dates,
-            "conversion_type": np.random.choice(
+            "conversion_type": get_random_state().choice(
                 _CONVERSION_TYPES, p=_CONVERSION_TYPE_WEIGHTS, size=n_samples
             ),
             "revenue_attributed": np.round(revenue, 2),
-            "attribution_model": np.random.choice(
+            "attribution_model": get_random_state().choice(
                 _ATTRIBUTION_MODELS, p=_ATTRIBUTION_MODEL_WEIGHTS, size=n_samples
             ),
         }

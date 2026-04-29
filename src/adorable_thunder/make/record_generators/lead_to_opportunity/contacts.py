@@ -3,6 +3,7 @@ import unicodedata
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.country import generate_country_codes
 from adorable_thunder.make.field_generators.identifiers import generate_n_random_uuids
 from adorable_thunder.make.field_generators.phone import generate_phone_numbers_mixed
@@ -141,7 +142,7 @@ def generate_contacts(
             "company": lead_companies,
             "first_name": lead_first_names,
             "last_name": lead_last_names,
-            "title": np.random.choice(_TITLES, p=_TITLE_WEIGHTS, size=n_samples),
+            "title": get_random_state().choice(_TITLES, p=_TITLE_WEIGHTS, size=n_samples),
             "email": emails,
             "phone": generate_phone_numbers_mixed(n_samples, country_codes),
             "country": country_codes,

@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.identifiers import (
     generate_n_random_uuids,
     generate_serial_numbers_with_prefix,
@@ -178,7 +179,7 @@ def generate_recurring_invoices(
         "invoice_number",
         generate_serial_numbers_with_prefix(n_rows, prefix="RIN-", total_length=12),
     )
-    df["status"] = np.random.choice(_INVOICE_STATUSES, p=_INVOICE_STATUS_WEIGHTS, size=n_rows)
+    df["status"] = get_random_state().choice(_INVOICE_STATUSES, p=_INVOICE_STATUS_WEIGHTS, size=n_rows)
     return df[
         [
             "invoice_id",

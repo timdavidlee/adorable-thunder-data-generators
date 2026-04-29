@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.amounts import generate_amounts
 from adorable_thunder.make.field_generators.dates import extrapolate_off_dates
 from adorable_thunder.make.field_generators.identifiers import (
@@ -126,10 +127,10 @@ def generate_opportunities(
     contact_dates: pd.Series,
     end_date: str = "2025-12-31",
 ) -> pd.DataFrame:
-    stages = np.random.choice(_STAGES, p=_STAGE_WEIGHTS, size=n_samples)
+    stages = get_random_state().choice(_STAGES, p=_STAGE_WEIGHTS, size=n_samples)
     probabilities = np.array([_STAGE_PROBABILITY[s] for s in stages])
 
-    segments = np.random.choice(
+    segments = get_random_state().choice(
         ["smb", "midmarket", "enterprise"], p=_SEGMENT_WEIGHTS, size=n_samples
     )
     deal_values = np.where(

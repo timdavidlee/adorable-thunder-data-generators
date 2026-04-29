@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.dates import extrapolate_off_dates
 from adorable_thunder.make.field_generators.identifiers import (
     generate_n_random_uuids,
@@ -95,9 +96,9 @@ def generate_lead_captures(
             ),
             "campaign_id": campaign_ids,
             "contact_id": contact_ids,
-            "form_type": np.random.choice(_FORM_TYPES, p=_FORM_TYPE_WEIGHTS, size=n_samples),
+            "form_type": get_random_state().choice(_FORM_TYPES, p=_FORM_TYPE_WEIGHTS, size=n_samples),
             "captured_date": captured_dates,
-            "source_medium": np.random.choice(
+            "source_medium": get_random_state().choice(
                 _SOURCE_MEDIUMS, p=_SOURCE_MEDIUM_WEIGHTS, size=n_samples
             ),
         }

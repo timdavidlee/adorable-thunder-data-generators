@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.identifiers import (
     generate_n_random_uuids,
     generate_serial_numbers_with_prefix,
@@ -135,7 +136,7 @@ def generate_renewals(
     n = len(eligible_idx)
 
     # Auto-renew accounts always get a renewal record. Manual-renew accounts renew ~70% of the time.
-    keeps = np.where(auto_renew[eligible_idx], True, np.random.random(n) < 0.70)
+    keeps = np.where(auto_renew[eligible_idx], True, get_random_state().random(n) < 0.70)
     keep_idx = eligible_idx[keeps]
     n = len(keep_idx)
     if n == 0:
@@ -154,14 +155,14 @@ def generate_renewals(
         )
 
     # MRR change distribution: 60% flat, 25% expansion, 15% contraction.
-    bands = np.random.choice([0, 1, 2], size=n, p=[0.60, 0.25, 0.15])
+    bands = get_random_state().choice([0, 1, 2], size=n, p=[0.60, 0.25, 0.15])
     multipliers = np.where(
         bands == 0,
         1.0,
         np.where(
             bands == 1,
-            np.random.uniform(1.05, 1.40, size=n),
-            np.random.uniform(0.70, 0.95, size=n),
+            get_random_state().uniform(1.05, 1.40, size=n),
+            get_random_state().uniform(0.70, 0.95, size=n),
         ),
     )
     prior_mrr = mrr_usd[keep_idx]
@@ -170,7 +171,7 @@ def generate_renewals(
 
     new_term = np.where(
         term_months[keep_idx] >= 12,
-        np.random.choice([12, 24, 36], p=[0.65, 0.25, 0.10], size=n),
+        get_random_state().choice([12, 24, 36], p=[0.65, 0.25, 0.10], size=n),
         12,
     )
 
@@ -186,6 +187,6 @@ def generate_renewals(
             "prior_mrr": prior_mrr,
             "new_mrr": new_mrr,
             "expansion_amount": expansion,
-            "status": np.random.choice(_RENEWAL_STATUSES, p=_RENEWAL_STATUS_WEIGHTS, size=n),
+            "status": get_random_state().choice(_RENEWAL_STATUSES, p=_RENEWAL_STATUS_WEIGHTS, size=n),
         }
     )

@@ -95,9 +95,9 @@ async def _grant_readonly_schema_access(cur: AsyncCursor, schema: str) -> None:
 
 async def _copy_df(cur: AsyncCursor, df: DataFrame, table: str, pg_schema: str) -> None:
     buf = io.StringIO()
-    df.to_csv(buf, index=False, header=False)
+    df.to_csv(buf, index=False, header=False, na_rep="\\N")
     buf.seek(0)
-    stmt = sql.SQL("COPY {}.{} FROM STDIN WITH CSV").format(
+    stmt = sql.SQL("COPY {}.{} FROM STDIN WITH (FORMAT CSV, NULL '\\N')").format(
         sql.Identifier(pg_schema), sql.Identifier(table)
     )
     async with cur.copy(stmt) as copy:
@@ -137,6 +137,8 @@ async def load_flow(
         for table, df in data.items():
             typer.echo(f"  {table}: {len(df)} rows")
             await _copy_df(cur, df, table, fgc.name)
+
+        await conn.commit()
 
     typer.echo("Done.")
 

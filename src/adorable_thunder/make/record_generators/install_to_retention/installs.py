@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.country import generate_country_codes
 from adorable_thunder.make.field_generators.dates import generate_random_dates
 from adorable_thunder.make.field_generators.identifiers import (
@@ -138,8 +139,8 @@ def generate_installs(
     device_ids = generate_serial_numbers_with_prefix(
         n_samples, prefix="DVC-", total_length=12
     )
-    platforms = np.random.choice(PLATFORMS, p=_PLATFORM_WEIGHTS, size=n_samples)
-    sources = np.random.choice(SOURCES, p=_SOURCE_WEIGHTS, size=n_samples)
+    platforms = get_random_state().choice(PLATFORMS, p=_PLATFORM_WEIGHTS, size=n_samples)
+    sources = get_random_state().choice(SOURCES, p=_SOURCE_WEIGHTS, size=n_samples)
 
     is_paid = np.isin(sources, _PAID_SOURCES)
     paid_campaign_ids = generate_n_random_uuids(n_samples)
@@ -150,15 +151,15 @@ def generate_installs(
     installed_at = generate_random_dates(start_date, end_date, n_samples)
 
     first_open_p = np.where(is_paid, _FIRST_OPEN_RATE_PAID, _FIRST_OPEN_RATE_ORGANIC)
-    has_first_open = np.random.random(n_samples) < first_open_p
+    has_first_open = get_random_state().random(n_samples) < first_open_p
 
-    first_open_offsets = np.random.randint(0, 2, size=n_samples)
+    first_open_offsets = get_random_state().randint(0, 2, size=n_samples)
     first_open_full = installed_at + pd.to_timedelta(first_open_offsets, unit="D")
     first_open_at = first_open_full.where(pd.Series(has_first_open))
 
-    has_account = has_first_open & (np.random.random(n_samples) < _ACCOUNT_CREATION_RATE)
+    has_account = has_first_open & (get_random_state().random(n_samples) < _ACCOUNT_CREATION_RATE)
     tutorial_completed = has_account & (
-        np.random.random(n_samples) < _TUTORIAL_COMPLETION_AMONG_ACCOUNTS
+        get_random_state().random(n_samples) < _TUTORIAL_COMPLETION_AMONG_ACCOUNTS
     )
 
     # Independent uniforms with conditional thresholds give the right marginals while
@@ -167,15 +168,15 @@ def generate_installs(
     d7_p = np.where(tutorial_completed, _COMPLETER_D7, _NON_COMPLETER_D7)
     d30_p = np.where(tutorial_completed, _COMPLETER_D30, _NON_COMPLETER_D30)
 
-    u1 = np.random.random(n_samples)
-    u7 = np.random.random(n_samples)
-    u30 = np.random.random(n_samples)
+    u1 = get_random_state().random(n_samples)
+    u7 = get_random_state().random(n_samples)
+    u30 = get_random_state().random(n_samples)
 
     retained_d1 = has_first_open & (u1 < d1_p)
     retained_d7 = retained_d1 & (u7 < d7_p / d1_p)
     retained_d30 = retained_d7 & (u30 < d30_p / d7_p)
 
-    is_payer = retained_d7 & (np.random.random(n_samples) < _PAYING_RATE_AMONG_D7_RETAINED)
+    is_payer = retained_d7 & (get_random_state().random(n_samples) < _PAYING_RATE_AMONG_D7_RETAINED)
 
     return pd.DataFrame(
         {

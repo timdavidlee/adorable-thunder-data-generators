@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.common.math import round_weights_and_rebalance
 from adorable_thunder.make.field_generators.amounts import generate_amounts
 from adorable_thunder.make.field_generators.currency import TOP_CURRENCIES
@@ -110,9 +111,9 @@ def generate_payments(
     if due_dates is not None:
         # 85% on-time (within ±3 days of due_date), 15% late (+4 to +30 days)
         n = len(due_dates)
-        late_mask = np.random.random(n) < 0.15
-        on_time_days = np.random.randint(-3, 4, size=n)
-        late_days = np.random.randint(4, 31, size=n)
+        late_mask = get_random_state().random(n) < 0.15
+        on_time_days = get_random_state().randint(-3, 4, size=n)
+        late_days = get_random_state().randint(4, 31, size=n)
         random_days = np.where(late_mask, late_days, on_time_days)
         payment_dates = due_dates + pd.to_timedelta(random_days, unit="D")
     else:
@@ -130,10 +131,10 @@ def generate_payments(
         )
 
     if currency_codes is None:
-        is_non_usd = np.random.random(n_samples) < 0.30
+        is_non_usd = get_random_state().random(n_samples) < 0.30
         currency_codes = np.where(
             is_non_usd,
-            np.random.choice(_NON_USD_CODES, p=_NON_USD_WEIGHTS, size=n_samples),
+            get_random_state().choice(_NON_USD_CODES, p=_NON_USD_WEIGHTS, size=n_samples),
             "USD",
         )
 
@@ -152,10 +153,10 @@ def generate_payments(
             "payment_date": payment_dates,
             "amount_paid": amounts_paid,
             "currency_code": currency_codes,
-            "payment_method": np.random.choice(
+            "payment_method": get_random_state().choice(
                 _PAYMENT_METHODS, p=_PAYMENT_METHOD_WEIGHTS, size=n_samples
             ),
-            "status": np.random.choice(
+            "status": get_random_state().choice(
                 _PAYMENT_STATUSES, p=_PAYMENT_STATUS_WEIGHTS, size=n_samples
             ),
             "payment_run_id": payment_run_ids,

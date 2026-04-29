@@ -2,6 +2,8 @@ from enum import Enum
 
 import numpy as np
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
+
 
 def round_weights_and_rebalance(weights: np.ndarray, precision: int = 4) -> np.ndarray:
     """
@@ -41,7 +43,7 @@ def generate_weighted_random_choice(
         n_samples: The number of samples to generate
         weights: The weights corresponding to each item. Must sum to 1.
     """
-    return np.random.choice(items, p=weights, size=n_samples)
+    return get_random_state().choice(items, p=weights, size=n_samples)
 
 
 def generate_weighted_enum_choices(

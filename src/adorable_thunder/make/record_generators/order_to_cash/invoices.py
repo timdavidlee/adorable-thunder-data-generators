@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.amounts import generate_amounts
 from adorable_thunder.make.field_generators.dates import (
     extrapolate_off_dates,
@@ -122,7 +123,7 @@ def generate_invoices(
 
     if order_net_amounts_usd is not None:
         # Invoice subtotal ≈ order net ±2% for minor adjustments
-        variation = np.random.uniform(-0.02, 0.02, n_samples)
+        variation = get_random_state().uniform(-0.02, 0.02, n_samples)
         subtotal_amounts = np.round(order_net_amounts_usd * (1 + variation), 2)
     else:
         subtotal_amounts = generate_amounts(
@@ -153,7 +154,7 @@ def generate_invoices(
             "subtotal_amount": subtotal_amounts,
             "tax_amount": tax_amounts,
             "total_amount": total_amounts,
-            "status": np.random.choice(
+            "status": get_random_state().choice(
                 _INVOICE_STATUSES, p=_INVOICE_STATUS_WEIGHTS, size=n_samples
             ),
         }

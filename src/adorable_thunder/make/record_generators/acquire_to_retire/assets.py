@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.cost_center import generate_cost_center_names
 from adorable_thunder.make.field_generators.country import generate_country_codes
 from adorable_thunder.make.field_generators.dates import generate_random_dates
@@ -245,7 +246,7 @@ def _sample_costs(asset_classes: np.ndarray) -> np.ndarray:
         mask = asset_classes == cls
         if not mask.any():
             continue
-        sample = np.random.lognormal(mean=mu, sigma=sigma, size=int(mask.sum()))
+        sample = get_random_state().lognormal(mean=mu, sigma=sigma, size=int(mask.sum()))
         costs[mask] = np.clip(sample, lo, hi)
     return np.round(costs, 2)
 
@@ -260,7 +261,7 @@ def _sample_useful_lives(asset_classes: np.ndarray) -> np.ndarray:
         if lo == hi:
             lives[mask] = lo
         else:
-            lives[mask] = np.random.randint(lo, hi + 1, size=int(mask.sum()))
+            lives[mask] = get_random_state().randint(lo, hi + 1, size=int(mask.sum()))
     return lives
 
 
@@ -270,7 +271,7 @@ def _sample_descriptions(asset_classes: np.ndarray) -> np.ndarray:
         mask = asset_classes == cls
         if not mask.any():
             continue
-        descriptions[mask] = np.random.choice(options, size=int(mask.sum()))
+        descriptions[mask] = get_random_state().choice(options, size=int(mask.sum()))
     return descriptions
 
 
@@ -280,7 +281,7 @@ def _sample_methods(asset_classes: np.ndarray) -> np.ndarray:
         mask = asset_classes == cls
         if not mask.any():
             continue
-        methods[mask] = np.random.choice(options, p=weights, size=int(mask.sum()))
+        methods[mask] = get_random_state().choice(options, p=weights, size=int(mask.sum()))
     return methods
 
 
@@ -299,14 +300,14 @@ def _assign_status(
 
     # Recent acquisitions: 50% planned (still being commissioned), 50% in_service.
     statuses[very_recent] = np.where(
-        np.random.random(int(very_recent.sum())) < 0.5, "planned", "in_service"
+        get_random_state().random(int(very_recent.sum())) < 0.5, "planned", "in_service"
     )
 
     # Past-useful-life: most are still in use but with book value at salvage floor.
     # Brief target: ~15% fully_depreciated and ~7% disposed across the whole portfolio.
     past_count = int(past_life.sum())
     if past_count:
-        statuses[past_life] = np.random.choice(
+        statuses[past_life] = get_random_state().choice(
             ["in_service", "fully_depreciated", "disposed"],
             p=[0.65, 0.25, 0.10],
             size=past_count,
@@ -315,7 +316,7 @@ def _assign_status(
     middle = ~very_recent & ~past_life
     middle_count = int(middle.sum())
     if middle_count:
-        statuses[middle] = np.random.choice(
+        statuses[middle] = get_random_state().choice(
             ["in_service", "disposed"], p=[0.95, 0.05], size=middle_count
         )
 
@@ -327,13 +328,13 @@ def generate_assets(
     start_date: str = "2024-01-01",
     end_date: str = "2025-12-31",
 ) -> pd.DataFrame:
-    asset_classes = np.random.choice(ASSET_CLASSES, p=_CLASS_WEIGHTS, size=n_samples)
+    asset_classes = get_random_state().choice(ASSET_CLASSES, p=_CLASS_WEIGHTS, size=n_samples)
     descriptions = _sample_descriptions(asset_classes)
     costs = _sample_costs(asset_classes)
     useful_lives = _sample_useful_lives(asset_classes)
     methods = _sample_methods(asset_classes)
 
-    salvage_zero = np.random.random(n_samples) < _SALVAGE_ZERO_RATE
+    salvage_zero = get_random_state().random(n_samples) < _SALVAGE_ZERO_RATE
     salvage_values = np.where(salvage_zero, 0.0, np.round(costs * 0.10, 2))
 
     # Wide acquisition window — buildings and intangibles need decade-old origins

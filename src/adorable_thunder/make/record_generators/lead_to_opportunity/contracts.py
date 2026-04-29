@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.dates import extrapolate_off_dates
 from adorable_thunder.make.field_generators.identifiers import (
     generate_n_random_uuids,
@@ -100,11 +101,11 @@ def generate_contracts(
     # Contract effective 0–14 days after quote date
     start_dates = extrapolate_off_dates(quote_dates, min_days=0, max_days=14)
     # Term: 12, 24, or 36 months (approximated as 365/730/1095 days)
-    term_days = np.random.choice([365, 730, 1095], p=[0.40, 0.35, 0.25], size=n_samples)
+    term_days = get_random_state().choice([365, 730, 1095], p=[0.40, 0.35, 0.25], size=n_samples)
     end_dates = start_dates + pd.to_timedelta(term_days, unit="D")
 
     # Contract value ≈ quote total ± 5%
-    variance = 1 + np.random.uniform(-0.05, 0.05, size=n_samples)
+    variance = 1 + get_random_state().uniform(-0.05, 0.05, size=n_samples)
     total_values = np.round(quote_totals * variance, 2)
 
     return pd.DataFrame(
@@ -114,14 +115,14 @@ def generate_contracts(
                 n_samples, prefix="CTR-", total_length=10
             ),
             "opp_id": opp_ids,
-            "contract_type": np.random.choice(
+            "contract_type": get_random_state().choice(
                 _CONTRACT_TYPES, p=_CONTRACT_TYPE_WEIGHTS, size=n_samples
             ),
             "start_date": start_dates,
             "end_date": end_dates,
             "total_value": total_values,
             "payment_terms": generate_payment_terms(n_samples),
-            "status": np.random.choice(
+            "status": get_random_state().choice(
                 _CONTRACT_STATUSES, p=_CONTRACT_STATUS_WEIGHTS, size=n_samples
             ),
         }

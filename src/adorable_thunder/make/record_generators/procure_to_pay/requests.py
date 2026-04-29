@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.common.math import round_weights_and_rebalance
 from adorable_thunder.make.field_generators.amounts import generate_amounts
 from adorable_thunder.make.field_generators.company import generate_company_names
@@ -151,10 +152,10 @@ def generate_requests(
         sigma=1.5,
     )
 
-    is_non_usd = np.random.random(n_samples) < 0.30
+    is_non_usd = get_random_state().random(n_samples) < 0.30
     currency_codes = np.where(
         is_non_usd,
-        np.random.choice(_NON_USD_CODES, p=_NON_USD_WEIGHTS, size=n_samples),
+        get_random_state().choice(_NON_USD_CODES, p=_NON_USD_WEIGHTS, size=n_samples),
         "USD",
     )
 
@@ -179,10 +180,10 @@ def generate_requests(
             "amount_usd": amounts_usd,
             "currency_code": currency_codes,
             "cost_center": generate_cost_center_names(n_samples),
-            "status": np.random.choice(
+            "status": get_random_state().choice(
                 _REQUEST_STATUSES, p=_REQUEST_STATUS_WEIGHTS, size=n_samples
             ),
-            "spend_category": np.random.choice(
+            "spend_category": get_random_state().choice(
                 SPEND_CATEGORIES, p=_SPEND_CATEGORY_WEIGHTS, size=n_samples
             ),
         }

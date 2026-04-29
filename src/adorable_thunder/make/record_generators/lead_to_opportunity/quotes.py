@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.dates import extrapolate_off_dates
 from adorable_thunder.make.field_generators.identifiers import (
     generate_n_random_uuids,
@@ -91,7 +92,7 @@ def generate_quotes(
     quote_dates = extrapolate_off_dates(opp_dates, min_days=0, max_days=14)
     expiry_dates = extrapolate_off_dates(quote_dates, min_days=30, max_days=90)
 
-    line_item_counts = np.random.choice(
+    line_item_counts = get_random_state().choice(
         np.arange(1, 9),
         p=[0.30, 0.25, 0.20, 0.12, 0.07, 0.03, 0.02, 0.01],
         size=n_samples,

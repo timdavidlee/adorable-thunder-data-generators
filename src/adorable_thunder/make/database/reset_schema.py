@@ -55,6 +55,8 @@ async def reset_schema(schema: str, pg_conn_config: PgConnConfig) -> None:
         await _ensure_readonly_user(cur, pg_conn_config.dbname)
         await _grant_readonly_schema_access(cur, schema)
 
+        await conn.commit()
+
     typer.echo("Done.")
 
 

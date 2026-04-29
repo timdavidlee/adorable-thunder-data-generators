@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.identifiers import (
     generate_n_random_uuids,
     generate_serial_numbers_with_prefix,
@@ -104,7 +105,7 @@ def generate_contracts(
     auto_renew: np.ndarray,
     sub_statuses: np.ndarray,
 ) -> pd.DataFrame:
-    sign_offsets = np.random.randint(0, 15, size=n_samples)
+    sign_offsets = get_random_state().randint(0, 15, size=n_samples)
     signed_dates = pd.Series(sub_start_dates - pd.to_timedelta(sign_offsets, unit="D"))
 
     total_values = np.round(mrr_usd * term_months, 2)

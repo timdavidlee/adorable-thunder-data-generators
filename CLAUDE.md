@@ -9,6 +9,10 @@ Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-s
 - **Linting/formatting:** `ruff` — run with `uv run ruff check` and `uv run ruff format`
 - **Testing:** `pytest` — run with `uv run pytest`
 
+## Rules
+
+@.claude/rules/random-state.md
+
 ## Guidelines
 
 **Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.

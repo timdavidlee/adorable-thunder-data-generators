@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.identifiers import generate_n_random_uuids
 from adorable_thunder.make.record_generators.schemas import CreatePgTableSql, PgColumn
 
@@ -135,7 +136,7 @@ def generate_disposals(assets: pd.DataFrame, dataset_end: str) -> pd.DataFrame:
         if min_disposal > dataset_end_ts:
             min_disposal = dataset_end_ts
         span_days = max((dataset_end_ts - min_disposal).days, 0)
-        offset_days = int(np.random.random() * span_days) if span_days > 0 else 0
+        offset_days = int(get_random_state().random() * span_days) if span_days > 0 else 0
         disposal_ts = min_disposal + pd.Timedelta(days=offset_days)
         disposal_dates.append(disposal_ts)
 
@@ -148,7 +149,7 @@ def generate_disposals(assets: pd.DataFrame, dataset_end: str) -> pd.DataFrame:
         )
         book_value_at_disposal[i] = round(float(costs[i]) - accumulated, 2)
 
-    disposal_types = np.random.choice(
+    disposal_types = get_random_state().choice(
         _DISPOSAL_TYPES, p=_DISPOSAL_TYPE_WEIGHTS, size=n
     )
 
@@ -157,7 +158,7 @@ def generate_disposals(assets: pd.DataFrame, dataset_end: str) -> pd.DataFrame:
         mask = asset_classes == cls
         if not mask.any():
             continue
-        rates = np.random.uniform(lo, hi, size=int(mask.sum()))
+        rates = get_random_state().uniform(lo, hi, size=int(mask.sum()))
         proceeds[mask] = np.round(costs[mask] * rates, 2)
 
     # Non-cash retirements yield no proceeds regardless of class.

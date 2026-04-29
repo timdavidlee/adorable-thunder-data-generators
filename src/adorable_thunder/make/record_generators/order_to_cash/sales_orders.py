@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.common.math import round_weights_and_rebalance
 from adorable_thunder.make.field_generators.amounts import (
     generate_amounts,
@@ -162,7 +163,7 @@ def generate_sales_orders(
         order_dates = generate_random_dates(start_date, end_date, n_samples)
 
     if quote_amounts_usd is not None:
-        variation = np.random.uniform(-0.02, 0.02, n_samples)
+        variation = get_random_state().uniform(-0.02, 0.02, n_samples)
         gross_amounts_usd = np.round(quote_amounts_usd * (1 + variation), 2)
     else:
         gross_amounts_usd = generate_amounts(
@@ -183,10 +184,10 @@ def generate_sales_orders(
     if quote_currency_codes is not None:
         currency_codes = quote_currency_codes
     else:
-        is_non_usd = np.random.random(n_samples) < 0.30
+        is_non_usd = get_random_state().random(n_samples) < 0.30
         currency_codes = np.where(
             is_non_usd,
-            np.random.choice(_NON_USD_CODES, p=_NON_USD_WEIGHTS, size=n_samples),
+            get_random_state().choice(_NON_USD_CODES, p=_NON_USD_WEIGHTS, size=n_samples),
             "USD",
         )
 
@@ -201,15 +202,15 @@ def generate_sales_orders(
             ),
             "order_date": order_dates,
             "customer_name": generate_company_names(n_samples),
-            "line_item_count": np.random.randint(1, 11, size=n_samples),
+            "line_item_count": get_random_state().randint(1, 11, size=n_samples),
             "gross_amount_usd": gross_amounts_usd,
             "discount_rate": discount_rates,
             "net_amount_usd": net_amounts_usd,
             "currency_code": fx_df["currency_code"],
             "net_amount_local": fx_df["amount_local"],
-            "payment_terms": np.random.choice(
+            "payment_terms": get_random_state().choice(
                 _OTC_PAYMENT_TERMS, p=_OTC_PAYMENT_TERM_WEIGHTS, size=n_samples
             ),
-            "status": np.random.choice(_ORDER_STATUSES, p=_ORDER_STATUS_WEIGHTS, size=n_samples),
+            "status": get_random_state().choice(_ORDER_STATUSES, p=_ORDER_STATUS_WEIGHTS, size=n_samples),
         }
     )

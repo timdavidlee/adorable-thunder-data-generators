@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.common.math import round_weights_and_rebalance
 from adorable_thunder.make.field_generators.company import generate_company_names
 from adorable_thunder.make.field_generators.currency import TOP_CURRENCIES
@@ -167,7 +168,7 @@ def _sample_mrr_for_tier(plan_tiers: np.ndarray) -> np.ndarray:
         # Lognormal within band, then clip — gives a rightward skew within each tier.
         mu = np.log((lo * hi) ** 0.5)
         sigma = 0.5
-        sampled = np.random.lognormal(mean=mu, sigma=sigma, size=int(mask.sum()))
+        sampled = get_random_state().lognormal(mean=mu, sigma=sigma, size=int(mask.sum()))
         out[mask] = np.clip(sampled, lo, hi)
     return np.round(out, 2)
 
@@ -181,7 +182,7 @@ def _assign_billing_cycle(plan_tiers: np.ndarray) -> np.ndarray:
     pro_mask = plan_tiers == "Professional"
     if pro_mask.any():
         # ~40% of Professional subscriptions bill annually.
-        pro_cycles = np.where(np.random.random(int(pro_mask.sum())) < 0.40, 12, 1)
+        pro_cycles = np.where(get_random_state().random(int(pro_mask.sum())) < 0.40, 12, 1)
         cycles[pro_mask] = pro_cycles
     return cycles
 
@@ -191,7 +192,7 @@ def _assign_term_months(billing_cycles: np.ndarray) -> np.ndarray:
     terms = np.full(n, 12, dtype=int)
     annual_mask = billing_cycles == 12
     if annual_mask.any():
-        terms[annual_mask] = np.random.choice(
+        terms[annual_mask] = get_random_state().choice(
             [12, 24, 36], p=[0.65, 0.25, 0.10], size=int(annual_mask.sum())
         )
     return terms
@@ -202,22 +203,22 @@ def generate_subscriptions(
     start_date: str = "2024-01-01",
     end_date: str = "2025-12-31",
 ) -> pd.DataFrame:
-    plan_tiers = np.random.choice(PLAN_TIERS, p=_PLAN_WEIGHTS, size=n_samples)
+    plan_tiers = get_random_state().choice(PLAN_TIERS, p=_PLAN_WEIGHTS, size=n_samples)
     billing_cycles = _assign_billing_cycle(plan_tiers)
     term_months = _assign_term_months(billing_cycles)
     mrr_usd = _sample_mrr_for_tier(plan_tiers)
 
-    is_non_usd = np.random.random(n_samples) < 0.30
+    is_non_usd = get_random_state().random(n_samples) < 0.30
     currency_codes = np.where(
         is_non_usd,
-        np.random.choice(_NON_USD_CODES, p=_NON_USD_WEIGHTS, size=n_samples),
+        get_random_state().choice(_NON_USD_CODES, p=_NON_USD_WEIGHTS, size=n_samples),
         "USD",
     )
 
     sub_start_dates = generate_random_dates(start_date, end_date, n_samples)
     sub_end_dates = pd.Series(sub_start_dates + pd.to_timedelta(term_months * 30, unit="D"))
 
-    statuses = np.random.choice(_STATUSES, p=_STATUS_WEIGHTS, size=n_samples)
+    statuses = get_random_state().choice(_STATUSES, p=_STATUS_WEIGHTS, size=n_samples)
     dataset_end = pd.Timestamp(end_date)
 
     churn_dates = pd.Series([pd.NaT] * n_samples, dtype="datetime64[ns]")
@@ -229,7 +230,7 @@ def generate_subscriptions(
         spans = (ends - starts).astype("timedelta64[D]").astype(int)
         spans = np.clip(spans, 1, None)
         offsets = np.array(
-            [np.random.randint(1, int(s) + 1) for s in spans.tolist()], dtype=int
+            [get_random_state().randint(1, int(s) + 1) for s in spans.tolist()], dtype=int
         )
         return pd.to_datetime(starts) + pd.to_timedelta(offsets, unit="D")
 
@@ -243,7 +244,7 @@ def generate_subscriptions(
         pause_idx = np.where(pause_mask)[0]
         pause_dates.iloc[pause_idx] = _sample_stop_dates(pause_idx)
 
-    auto_renew = np.random.random(n_samples) < 0.60
+    auto_renew = get_random_state().random(n_samples) < 0.60
 
     return pd.DataFrame(
         {

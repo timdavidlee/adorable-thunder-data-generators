@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.identifiers import generate_n_random_uuids
 from adorable_thunder.make.record_generators.schemas import CreatePgTableSql, PgColumn
 
@@ -96,11 +97,11 @@ def generate_activation_events(installs: pd.DataFrame) -> pd.DataFrame:
     # monotonic: account ≤ profile/tutorial ≤ FMA. Using one shared offset per install
     # for each milestone (rather than independent draws per event type) prevents
     # tutorial-before-account inversions.
-    account_offset = np.random.randint(0, 3, size=n)
-    profile_offset = account_offset + np.random.randint(0, 3, size=n)
-    tutorial_offset = account_offset + np.random.randint(0, 3, size=n)
-    fma_offset = tutorial_offset + np.random.randint(0, 4, size=n)
-    profile_drawn = np.random.random(n) < _PROFILE_SETUP_RATE_AMONG_ACCOUNTS
+    account_offset = get_random_state().randint(0, 3, size=n)
+    profile_offset = account_offset + get_random_state().randint(0, 3, size=n)
+    tutorial_offset = account_offset + get_random_state().randint(0, 3, size=n)
+    fma_offset = tutorial_offset + get_random_state().randint(0, 4, size=n)
+    profile_drawn = get_random_state().random(n) < _PROFILE_SETUP_RATE_AMONG_ACCOUNTS
 
     rows: list[dict[str, object]] = []
 

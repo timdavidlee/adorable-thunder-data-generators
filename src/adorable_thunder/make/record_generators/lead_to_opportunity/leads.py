@@ -3,6 +3,7 @@ import unicodedata
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.company import generate_company_names
 from adorable_thunder.make.field_generators.dates import generate_random_dates
 from adorable_thunder.make.field_generators.identifiers import (
@@ -140,7 +141,7 @@ def generate_leads(
     n_conv = min(n_conv, n_samples)
 
     statuses = np.full(n_samples, "new", dtype=object)
-    perm = np.random.permutation(n_samples)
+    perm = get_random_state().permutation(n_samples)
     statuses[perm[:n_conv]] = "converted"
     remaining = perm[n_conv:]
     n_qual = int(len(remaining) * 0.10)
@@ -159,7 +160,7 @@ def generate_leads(
             "email": emails,
             "phone": generate_phone_numbers(n_samples),
             "company": companies,
-            "source": np.random.choice(_SOURCES, p=_SOURCE_WEIGHTS, size=n_samples),
+            "source": get_random_state().choice(_SOURCES, p=_SOURCE_WEIGHTS, size=n_samples),
             "created_date": generate_random_dates(start_date, end_date, n_samples),
             "status": statuses,
         }

@@ -1,11 +1,14 @@
 import numpy as np
 
-# shared across all generators to ensure reproducibility and consistency
+# Single seeded stream shared by every generator. Determinism depends on call
+# order — never call np.random.* directly; route through get_random_state().
 RANDOM_SEED = 42
-NP_RANDOM_STATE = np.random.RandomState(RANDOM_SEED)
+_NP_RANDOM_STATE = np.random.RandomState(RANDOM_SEED)
 
 
-def get_random_state(frozen: bool = False) -> np.random.RandomState:
-    if frozen:
-        return NP_RANDOM_STATE
-    return np.random.RandomState()
+def get_random_state() -> np.random.RandomState:
+    return _NP_RANDOM_STATE
+
+
+def reset_random_state(seed: int = RANDOM_SEED) -> None:
+    _NP_RANDOM_STATE.seed(seed)

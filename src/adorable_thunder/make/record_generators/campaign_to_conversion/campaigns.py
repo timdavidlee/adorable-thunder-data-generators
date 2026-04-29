@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.amounts import generate_amounts
 from adorable_thunder.make.field_generators.dates import generate_random_dates
 from adorable_thunder.make.field_generators.identifiers import (
@@ -102,10 +103,10 @@ def generate_campaigns(
 ) -> pd.DataFrame:
     campaign_starts = generate_random_dates(start_date, end_date, n_samples)
     # Campaign durations: 7–90 days
-    durations = np.random.randint(7, 91, size=n_samples)
+    durations = get_random_state().randint(7, 91, size=n_samples)
     campaign_ends = campaign_starts + pd.to_timedelta(durations, unit="D")
 
-    channels = np.random.choice(_CHANNELS, p=_CHANNEL_WEIGHTS, size=n_samples)
+    channels = get_random_state().choice(_CHANNELS, p=_CHANNEL_WEIGHTS, size=n_samples)
 
     # Budget ranges are calibrated to produce 500–1,000 impressions per campaign when
     # divided by the channel CPM rate in flow.py (CPM = CPL_midpoint × 0.0045 × 1000).
@@ -145,7 +146,7 @@ def generate_campaigns(
             "start_date": campaign_starts,
             "end_date": campaign_ends,
             "budget_usd": np.round(budgets, 2),
-            "target_audience": np.random.choice(_AUDIENCES, size=n_samples),
-            "status": np.random.choice(_STATUSES, p=_STATUS_WEIGHTS, size=n_samples),
+            "target_audience": get_random_state().choice(_AUDIENCES, size=n_samples),
+            "status": get_random_state().choice(_STATUSES, p=_STATUS_WEIGHTS, size=n_samples),
         }
     )

@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.address import generate_addresses
 from adorable_thunder.make.field_generators.carrier import generate_carriers
 from adorable_thunder.make.field_generators.dates import (
@@ -158,7 +159,7 @@ def generate_shipments(
     transport_mode_arr = carrier_df["transport_mode"].to_numpy()
     replace_mask = np.isin(incoterms_codes, ["CIF", "CFR"]) & (transport_mode_arr != "ocean")
     if replace_mask.any():
-        incoterms_codes[replace_mask] = np.random.choice(
+        incoterms_codes[replace_mask] = get_random_state().choice(
             np.array(["CIP", "CPT", "DAP", "DDP"]), size=int(replace_mask.sum())
         )
 
@@ -181,7 +182,7 @@ def generate_shipments(
             "origin_country_code": origin_country,
             "destination_city": destination_df["city"].to_numpy(),
             "destination_country_code": destination_country,
-            "status": np.random.choice(
+            "status": get_random_state().choice(
                 _SHIPMENT_STATUSES, p=_SHIPMENT_STATUS_WEIGHTS, size=n_samples
             ),
         }

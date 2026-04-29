@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.identifiers import generate_n_random_uuids
 from adorable_thunder.make.record_generators.schemas import CreatePgTableSql, PgColumn
 
@@ -110,7 +111,7 @@ def generate_usage_records(
     dataset_end: str,
 ) -> pd.DataFrame:
     n = len(sub_ids)
-    has_usage = np.random.random(n) < USAGE_FRACTION
+    has_usage = get_random_state().random(n) < USAGE_FRACTION
     usage_idx = np.where(has_usage)[0]
     if len(usage_idx) == 0:
         return pd.DataFrame(
@@ -126,7 +127,7 @@ def generate_usage_records(
             ]
         )
 
-    sub_metrics = np.random.choice(_USAGE_METRICS, p=_USAGE_METRIC_WEIGHTS, size=len(usage_idx))
+    sub_metrics = get_random_state().choice(_USAGE_METRICS, p=_USAGE_METRIC_WEIGHTS, size=len(usage_idx))
     dataset_end_ts = pd.Timestamp(dataset_end)
     starts = pd.to_datetime(sub_start_dates).reset_index(drop=True)
     ends = pd.to_datetime(sub_end_dates).reset_index(drop=True)
@@ -139,8 +140,8 @@ def generate_usage_records(
         qty_lo, qty_hi = _METRIC_QTY_RANGE[metric]
         price_lo, price_hi = _METRIC_UNIT_PRICE[metric]
         # Per-subscription baseline so a sub stays in a band rather than swinging wildly.
-        base_qty = np.random.uniform(qty_lo, qty_hi)
-        unit_price = round(np.random.uniform(price_lo, price_hi), 6)
+        base_qty = get_random_state().uniform(qty_lo, qty_hi)
+        unit_price = round(get_random_state().uniform(price_lo, price_hi), 6)
 
         start: pd.Timestamp = starts.iloc[i]
         end: pd.Timestamp = ends.iloc[i]
@@ -157,7 +158,7 @@ def generate_usage_records(
             period_start = start + pd.DateOffset(months=period_idx * cycle)
             period_end = start + pd.DateOffset(months=(period_idx + 1) * cycle)
             # ±25% noise around the baseline.
-            qty = max(0.0, base_qty * np.random.uniform(0.75, 1.25))
+            qty = max(0.0, base_qty * get_random_state().uniform(0.75, 1.25))
             qty = round(qty, 2)
             amount = round(qty * unit_price, 2)
             rows.append(

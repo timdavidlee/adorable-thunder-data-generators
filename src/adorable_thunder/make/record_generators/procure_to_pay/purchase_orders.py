@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.common.math import round_weights_and_rebalance
 from adorable_thunder.make.field_generators.amounts import (
     generate_amounts,
@@ -182,10 +183,10 @@ def generate_purchase_orders(
     )
 
     # ~30% non-USD per P2P flow brief
-    is_non_usd = np.random.random(n_samples) < 0.30
+    is_non_usd = get_random_state().random(n_samples) < 0.30
     currency_codes = np.where(
         is_non_usd,
-        np.random.choice(_NON_USD_CODES, p=_NON_USD_WEIGHTS, size=n_samples),
+        get_random_state().choice(_NON_USD_CODES, p=_NON_USD_WEIGHTS, size=n_samples),
         "USD",
     )
     fx_df = generate_local_currency_amounts(amounts_usd, currency_codes)
@@ -198,7 +199,7 @@ def generate_purchase_orders(
     if spend_categories is None:
         from .requests import SPEND_CATEGORIES
 
-        spend_categories = np.random.choice(SPEND_CATEGORIES, size=n_samples)
+        spend_categories = get_random_state().choice(SPEND_CATEGORIES, size=n_samples)
 
     gl_accounts = generate_ledger_accounts(n_samples, account_type="opex")
 
@@ -213,7 +214,7 @@ def generate_purchase_orders(
             "supplier_name": supplier_names
             if supplier_names is not None
             else generate_company_names(n_samples),
-            "line_item_count": np.random.choice(
+            "line_item_count": get_random_state().choice(
                 np.arange(1, 11),
                 p=[0.30, 0.25, 0.18, 0.12, 0.07, 0.04, 0.02, 0.01, 0.005, 0.005],
                 size=n_samples,
@@ -222,7 +223,7 @@ def generate_purchase_orders(
             "currency_code": fx_df["currency_code"],
             "total_amount_local": fx_df["amount_local"],
             "payment_terms": generate_payment_terms(n_samples),
-            "status": np.random.choice(_PO_STATUSES, p=_PO_STATUS_WEIGHTS, size=n_samples),
+            "status": get_random_state().choice(_PO_STATUSES, p=_PO_STATUS_WEIGHTS, size=n_samples),
             "supplier_country": generate_country_codes(n_samples),
             "supplier_category": spend_categories,
             "gl_account": gl_accounts["account_code"].to_numpy(),

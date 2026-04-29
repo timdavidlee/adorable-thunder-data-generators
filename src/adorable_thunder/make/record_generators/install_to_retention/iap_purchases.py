@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.common.math import round_weights_and_rebalance
 from adorable_thunder.make.field_generators.currency import TOP_CURRENCIES
 from adorable_thunder.make.field_generators.identifiers import generate_n_random_uuids
@@ -117,7 +118,7 @@ def generate_iap_purchases(installs: pd.DataFrame, dataset_end: str) -> pd.DataF
 
     # Lognormal purchase counts give a realistic long-tail of whales without flat distribution.
     n_purchases_per = np.clip(
-        np.round(np.random.lognormal(mean=0.5, sigma=0.7, size=n_payers)), 1, 10
+        np.round(get_random_state().lognormal(mean=0.5, sigma=0.7, size=n_payers)), 1, 10
     ).astype(int)
 
     dataset_end_ts = pd.Timestamp(dataset_end)
@@ -131,16 +132,16 @@ def generate_iap_purchases(installs: pd.DataFrame, dataset_end: str) -> pd.DataF
         first_open = first_opens.iloc[i]
         store = "app_store" if platforms[i] == "iOS" else "google_play"
         for _ in range(int(n_purchases_per[i])):
-            offset = int(np.random.randint(1, 91))
+            offset = int(get_random_state().randint(1, 91))
             purchased_at = first_open + pd.Timedelta(days=offset)
             if purchased_at > dataset_end_ts:
                 continue
-            amount = float(np.random.choice(_PRICE_POINTS, p=_PRICE_WEIGHTS))
+            amount = float(get_random_state().choice(_PRICE_POINTS, p=_PRICE_WEIGHTS))
             sku = f"iap_{int(round(amount * 100)):04d}"
             currency_code = (
                 "USD"
-                if np.random.random() < _USD_SHARE
-                else str(np.random.choice(_NON_USD_CODES, p=_NON_USD_WEIGHTS))
+                if get_random_state().random() < _USD_SHARE
+                else str(get_random_state().choice(_NON_USD_CODES, p=_NON_USD_WEIGHTS))
             )
             rows.append(
                 {

@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.dates import generate_random_dates
 from adorable_thunder.make.field_generators.identifiers import (
     generate_n_random_uuids,
@@ -86,11 +87,11 @@ def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
 def _generate_received_dates(due_dates: pd.Series) -> pd.Series:
     """3-band payment timing: 60% on-time (±3 days), 25% moderately late (4-14), 15% very late (15-30)."""
     n = len(due_dates)
-    bands = np.random.choice([0, 1, 2], size=n, p=[0.60, 0.25, 0.15])
+    bands = get_random_state().choice([0, 1, 2], size=n, p=[0.60, 0.25, 0.15])
     days_offset = np.where(
         bands == 0,
-        np.random.randint(-3, 4, n),
-        np.where(bands == 1, np.random.randint(4, 15, n), np.random.randint(15, 31, n)),
+        get_random_state().randint(-3, 4, n),
+        np.where(bands == 1, get_random_state().randint(4, 15, n), get_random_state().randint(15, 31, n)),
     )
     return pd.Series(pd.to_datetime(due_dates.values) + pd.to_timedelta(days_offset, unit="D"))
 
@@ -103,10 +104,10 @@ def _override_discount_dates(
     """For ~20% of 2/10 Net 30 invoices, replace received_date with invoice_date + 5-10 days
     to simulate customers capturing the early-payment discount."""
     is_2_10 = payment_terms == "2/10 Net 30"
-    takes_discount = is_2_10 & (np.random.random(len(dates)) < 0.20)
+    takes_discount = is_2_10 & (get_random_state().random(len(dates)) < 0.20)
     if not takes_discount.any():
         return dates
-    early_offsets = np.random.randint(5, 11, int(takes_discount.sum()))
+    early_offsets = get_random_state().randint(5, 11, int(takes_discount.sum()))
     early_dates = pd.to_datetime(invoice_dates.to_numpy()[takes_discount]) + pd.to_timedelta(
         early_offsets, unit="D"
     )
@@ -138,7 +139,7 @@ def generate_cash_receipts(
         currency_codes = np.full(n_samples, "USD")
 
     # Decide which invoices get partial payments (two receipts)
-    is_partial = np.random.random(n_samples) < 0.225
+    is_partial = get_random_state().random(n_samples) < 0.225
     partial_idx = np.where(is_partial)[0]
     full_idx = np.where(~is_partial)[0]
 
@@ -187,12 +188,12 @@ def generate_cash_receipts(
             inv_total = (
                 float(invoice_totals_usd[inv_idx]) if invoice_totals_usd is not None else 0.0
             )
-            partial_rate = np.random.uniform(0.85, 0.99)
+            partial_rate = get_random_state().uniform(0.85, 0.99)
             first_amount = round(inv_total * partial_rate, 2)
             remainder = round(inv_total - first_amount, 2)
             first_date = first_dates.iloc[i]
             # Second receipt arrives 5-15 days after the first
-            second_date = first_date + pd.Timedelta(days=int(np.random.randint(5, 16)))
+            second_date = first_date + pd.Timedelta(days=int(get_random_state().randint(5, 16)))
 
             rows.append(
                 {
@@ -222,9 +223,9 @@ def generate_cash_receipts(
         "receipt_number",
         generate_serial_numbers_with_prefix(n_rows, prefix="RCP-", total_length=12),
     )
-    df["payment_method"] = np.random.choice(
+    df["payment_method"] = get_random_state().choice(
         _PAYMENT_METHODS, p=_PAYMENT_METHOD_WEIGHTS, size=n_rows
     )
-    df["status"] = np.random.choice(_RECEIPT_STATUSES, p=_RECEIPT_STATUS_WEIGHTS, size=n_rows)
+    df["status"] = get_random_state().choice(_RECEIPT_STATUSES, p=_RECEIPT_STATUS_WEIGHTS, size=n_rows)
 
     return df

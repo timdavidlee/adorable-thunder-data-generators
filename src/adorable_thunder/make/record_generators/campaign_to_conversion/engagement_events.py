@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.dates import extrapolate_off_dates
 from adorable_thunder.make.field_generators.identifiers import generate_n_random_uuids
 from adorable_thunder.make.record_generators.schemas import CreatePgTableSql, PgColumn
@@ -89,8 +90,8 @@ def generate_engagement_events(
             "impression_id": impression_ids,
             "campaign_id": campaign_ids,
             "contact_id": contact_ids,
-            "event_type": np.random.choice(_EVENT_TYPES, p=_EVENT_TYPE_WEIGHTS, size=n_samples),
+            "event_type": get_random_state().choice(_EVENT_TYPES, p=_EVENT_TYPE_WEIGHTS, size=n_samples),
             "engagement_date": engagement_dates,
-            "device": np.random.choice(_DEVICES, p=_DEVICE_WEIGHTS, size=n_samples),
+            "device": get_random_state().choice(_DEVICES, p=_DEVICE_WEIGHTS, size=n_samples),
         }
     )

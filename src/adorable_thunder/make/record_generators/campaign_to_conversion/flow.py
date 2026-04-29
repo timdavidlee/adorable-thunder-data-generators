@@ -3,6 +3,7 @@ from typing import ClassVar
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.record_generators.schemas import BaseGeneratorConfig
 
 from .campaigns import CAMPAIGNS_TABLE_NAME, generate_campaigns
@@ -69,7 +70,7 @@ class GeneratorConfig(BaseGeneratorConfig):
             ch_indices = np.where(imp_channels == channel)[0]
             n_eng = min(int(len(ch_indices) * rate), len(ch_indices))
             if n_eng > 0:
-                eng_parts.append(np.random.choice(ch_indices, size=n_eng, replace=False))
+                eng_parts.append(get_random_state().choice(ch_indices, size=n_eng, replace=False))
         eng_idx = np.concatenate(eng_parts) if eng_parts else np.array([], dtype=int)
         n_engagements = len(eng_idx)
         engagements = generate_engagement_events(
@@ -86,7 +87,7 @@ class GeneratorConfig(BaseGeneratorConfig):
 
         # Leads: ~15% of engagements — deduplicate contact+campaign pairs
         n_leads_raw = max(1, int(n_engagements * _ENGAGEMENT_TO_LEAD_RATE))
-        lead_idx = np.random.choice(n_engagements, size=n_leads_raw, replace=False)
+        lead_idx = get_random_state().choice(n_engagements, size=n_leads_raw, replace=False)
         lead_df = (
             pd.DataFrame(
                 {
@@ -114,7 +115,7 @@ class GeneratorConfig(BaseGeneratorConfig):
 
         # Conversions: ~5% of leads
         n_conversions = max(1, int(len(leads) * _LEAD_TO_CONVERSION_RATE))
-        conv_idx = np.random.choice(len(leads), size=n_conversions, replace=False)
+        conv_idx = get_random_state().choice(len(leads), size=n_conversions, replace=False)
         conversions = generate_conversions(
             n_conversions,
             lead_ids=leads["lead_id"].to_numpy()[conv_idx],

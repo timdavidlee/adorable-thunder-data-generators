@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.identifiers import generate_n_random_uuids
 from adorable_thunder.make.record_generators.schemas import CreatePgTableSql, PgColumn
 
@@ -71,7 +72,7 @@ def generate_accounts(installs: pd.DataFrame) -> pd.DataFrame:
         )
 
     first_open = pd.to_datetime(acct_installs["first_open_at"])
-    offsets = np.random.randint(0, 3, size=n)
+    offsets = get_random_state().randint(0, 3, size=n)
     created_at = first_open + pd.to_timedelta(offsets, unit="D")
 
     return pd.DataFrame(
@@ -79,7 +80,7 @@ def generate_accounts(installs: pd.DataFrame) -> pd.DataFrame:
             "account_id": generate_n_random_uuids(n),
             "install_id": acct_installs["install_id"].to_numpy(),
             "user_id": generate_n_random_uuids(n),
-            "signup_method": np.random.choice(
+            "signup_method": get_random_state().choice(
                 _SIGNUP_METHODS, p=_SIGNUP_METHOD_WEIGHTS, size=n
             ),
             "created_at": created_at,

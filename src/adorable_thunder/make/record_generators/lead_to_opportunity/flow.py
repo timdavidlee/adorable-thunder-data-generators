@@ -1,8 +1,8 @@
 from typing import ClassVar
 
-import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.dates import extrapolate_off_dates
 from adorable_thunder.make.record_generators.schemas import BaseGeneratorConfig
 
@@ -44,7 +44,7 @@ class GeneratorConfig(BaseGeneratorConfig):
 
         # Opportunities from a random subset of contacts
         n_opps = max(1, int(len(contacts) * _CONTACT_TO_OPP_RATE))
-        opp_idx = np.random.choice(len(contacts), size=n_opps, replace=False)
+        opp_idx = get_random_state().choice(len(contacts), size=n_opps, replace=False)
         opp_contacts = contacts.iloc[opp_idx].reset_index(drop=True)
         opp_contact_dates = contact_dates.iloc[opp_idx].reset_index(drop=True)
 

@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.dates import choose_random_date_between_dates
 from adorable_thunder.make.field_generators.identifiers import generate_n_random_uuids
 from adorable_thunder.make.record_generators.schemas import CreatePgTableSql, PgColumn
@@ -93,10 +94,10 @@ def generate_impressions(
             "impression_id": generate_n_random_uuids(n),
             "campaign_id": campaign_ids,
             "contact_id": generate_n_random_uuids(contact_pool_size)[
-                np.random.randint(0, contact_pool_size, size=n)
+                get_random_state().randint(0, contact_pool_size, size=n)
             ],
             "impression_date": impression_dates,
             "channel": campaign_channels,
-            "placement": np.random.choice(_PLACEMENTS, size=n),
+            "placement": get_random_state().choice(_PLACEMENTS, size=n),
         }
     )

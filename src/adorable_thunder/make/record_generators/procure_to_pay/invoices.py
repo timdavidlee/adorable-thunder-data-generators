@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from adorable_thunder.make.field_generators._random_state import get_random_state
 from adorable_thunder.make.field_generators.amounts import generate_amounts
 from adorable_thunder.make.field_generators.dates import (
     extrapolate_off_dates,
@@ -144,7 +145,7 @@ def generate_invoices(
         po_dates_dt = pd.to_datetime(po_dates).reset_index(drop=True)
         invoice_dates_dt = pd.to_datetime(invoice_dates).reset_index(drop=True)
         spans = (invoice_dates_dt - po_dates_dt).dt.days.clip(lower=0).to_numpy()
-        offsets = (np.random.random(n_samples) * spans).astype(int)
+        offsets = (get_random_state().random(n_samples) * spans).astype(int)
         goods_receipt_dates = po_dates_dt + pd.to_timedelta(offsets, unit="D")
     else:
         invoice_dates = generate_random_dates(start_date, end_date, n_samples)
@@ -157,7 +158,7 @@ def generate_invoices(
 
     if po_amounts_usd is not None:
         # Invoice ≈ PO amount ±2% for minor FX/adjustment tolerance per brief
-        variation = np.random.uniform(-0.02, 0.02, n_samples)
+        variation = get_random_state().uniform(-0.02, 0.02, n_samples)
         amounts_invoiced = np.round(po_amounts_usd * (1 + variation), 2)
     else:
         amounts_invoiced = generate_amounts(
@@ -182,12 +183,12 @@ def generate_invoices(
             "due_date": due_dates,
             "amount_invoiced": amounts_invoiced,
             "tax_amount": tax_amounts,
-            "status": np.random.choice(
+            "status": get_random_state().choice(
                 _INVOICE_STATUSES, p=_INVOICE_STATUS_WEIGHTS, size=n_samples
             ),
             "currency_code": po_currency_codes,
             "goods_receipt_date": goods_receipt_dates,
-            "match_status": np.random.choice(
+            "match_status": get_random_state().choice(
                 _MATCH_STATUSES, p=_MATCH_STATUS_WEIGHTS, size=n_samples
             ),
         }
