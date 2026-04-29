@@ -76,6 +76,13 @@ def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
                 llm_description="Order lifecycle status. Mix: pending ~25%, in_transit ~35%, received ~35%, cancelled ~5%.",
                 llm_example_values="'pending', 'in_transit', 'received', 'cancelled'",
             ),
+            PgColumn(
+                name="actual_receipt_date",
+                data_type="DATE",
+                modifiers="",
+                llm_description="Actual goods-receipt date. Populated only when status = 'received'; NULL otherwise. Compared against expected_receipt_date for supplier OTD%.",
+                llm_example_values="'2024-07-12', '2025-06-18', NULL",
+            ),
         ],
     )
 
@@ -98,7 +105,19 @@ def generate_replenishment_orders(
     multiples = np.ceil(needed / economic_order_qty).astype(int)
     order_qty = (multiples * economic_order_qty).astype(int)
 
-    expected_receipt_date = trigger_dates + pd.to_timedelta(lead_time_days, unit="D")
+    expected_receipt_date = (
+        trigger_dates + pd.to_timedelta(lead_time_days, unit="D")
+    ).reset_index(drop=True)
+
+    status = rng.choice(_STATUSES, p=_STATUS_WEIGHTS, size=n)
+
+    # Skew receipt offset slightly late so OTD% lands ~80–90%; early receipts allowed.
+    receipt_offset_days = rng.randint(-2, 8, size=n)
+    actual_receipt_date = expected_receipt_date + pd.to_timedelta(
+        receipt_offset_days, unit="D"
+    )
+    # Series.where with no `other` substitutes NaT for datetime-typed series.
+    actual_receipt_date = actual_receipt_date.where(pd.Series(status == "received"))
 
     return pd.DataFrame(
         {
@@ -110,7 +129,8 @@ def generate_replenishment_orders(
             "location": locations,
             "trigger_date": trigger_dates.reset_index(drop=True),
             "order_qty": order_qty,
-            "expected_receipt_date": expected_receipt_date.reset_index(drop=True),
-            "status": rng.choice(_STATUSES, p=_STATUS_WEIGHTS, size=n),
+            "expected_receipt_date": expected_receipt_date,
+            "status": status,
+            "actual_receipt_date": actual_receipt_date,
         }
     )

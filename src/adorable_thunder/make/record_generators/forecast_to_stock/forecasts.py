@@ -69,6 +69,13 @@ def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
                 llm_description="Date the forecast was generated.",
                 llm_example_values="'2024-03-01', '2025-09-15'",
             ),
+            PgColumn(
+                name="actual_qty",
+                data_type="INTEGER",
+                modifiers="NOT NULL",
+                llm_description="Actual demand units realised for the period. Independently noisy around avg_daily_demand × ~30; pair with forecast_qty to compute MAPE / forecast bias.",
+                llm_example_values="'342', '2680', '10250'",
+            ),
         ],
     )
 
@@ -102,6 +109,9 @@ def generate_forecasts(
     noise = rng.uniform(0.75, 1.25, size=n_rows)
     forecast_qty = np.ceil(repeated_demand * 30 * noise).astype(int)
 
+    actual_noise = rng.uniform(0.70, 1.40, size=n_rows)
+    actual_qty = np.ceil(repeated_demand * 30 * actual_noise).astype(int)
+
     return pd.DataFrame(
         {
             "forecast_id": generate_n_random_uuids(n_rows),
@@ -111,5 +121,6 @@ def generate_forecasts(
             "uom": repeated_uoms,
             "model": rng.choice(_MODELS, p=_MODEL_WEIGHTS, size=n_rows),
             "created_date": generate_random_dates(start_date, end_date, n_rows),
+            "actual_qty": actual_qty,
         }
     )

@@ -74,6 +74,13 @@ def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
                 llm_description="Derived: on_hand_qty + on_order_qty − committed_qty. Compared against reorder_point to trigger replenishment.",
                 llm_example_values="'0', '830', '14200'",
             ),
+            PgColumn(
+                name="inventory_value_usd",
+                data_type="NUMERIC(14, 2)",
+                modifiers="NOT NULL",
+                llm_description="On-hand inventory valuation in USD = on_hand_qty × unit_cost_usd. Drives working-capital and $-weighted overstock metrics.",
+                llm_example_values="'0.00', '4250.00', '125000.00'",
+            ),
         ],
     )
 
@@ -83,6 +90,7 @@ def generate_inventory_positions(
     locations: np.ndarray,
     reorder_points: np.ndarray,
     avg_daily_demand: np.ndarray,
+    unit_cost_usd: np.ndarray,
     start_date: str = "2024-01-01",
     end_date: str = "2025-12-31",
 ) -> pd.DataFrame:
@@ -94,6 +102,7 @@ def generate_inventory_positions(
     repeated_locations = np.repeat(locations, _SNAPSHOTS_PER_PAIR)
     repeated_reorder = np.repeat(reorder_points, _SNAPSHOTS_PER_PAIR)
     repeated_demand = np.repeat(avg_daily_demand, _SNAPSHOTS_PER_PAIR)
+    repeated_unit_cost = np.repeat(unit_cost_usd, _SNAPSHOTS_PER_PAIR)
 
     is_triggered = rng.random(n_rows) < _TRIGGER_RATE
 
@@ -119,6 +128,8 @@ def generate_inventory_positions(
 
     available_qty = on_hand_qty + on_order_qty - committed_qty
 
+    inventory_value_usd = np.round(on_hand_qty * repeated_unit_cost, 2)
+
     return pd.DataFrame(
         {
             "record_id": generate_n_random_uuids(n_rows),
@@ -129,5 +140,6 @@ def generate_inventory_positions(
             "on_order_qty": on_order_qty,
             "committed_qty": committed_qty,
             "available_qty": available_qty,
+            "inventory_value_usd": inventory_value_usd,
         }
     )

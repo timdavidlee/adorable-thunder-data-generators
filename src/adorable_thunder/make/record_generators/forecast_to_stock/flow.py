@@ -88,6 +88,7 @@ class GeneratorConfig(BaseGeneratorConfig):
             locations=stock_parameters["location"].to_numpy(),
             reorder_points=stock_parameters["reorder_point"].to_numpy(),
             avg_daily_demand=stock_parameters["avg_daily_demand"].to_numpy(),
+            unit_cost_usd=stock_parameters["unit_cost_usd"].to_numpy(),
             start_date=self.start_date,
             end_date=self.end_date,
         )
