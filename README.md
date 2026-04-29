@@ -47,6 +47,7 @@ adorable-thunder-data-generators/
 ├── compose.yml                     # Docker Compose: Postgres + seeder services
 ├── Dockerfile.seeder               # Image used by seeder services
 ├── pyproject.toml                  # Project metadata and dependencies (uv / hatch)
+├── BRIEFS.md                       # Registry of every flow brief and whether it has a generator
 │
 ├── src/adorable_thunder/
 │   │
@@ -56,9 +57,16 @@ adorable-thunder-data-generators/
 │   │   ├── cli.py                  # CLI commands for generation
 │   │   ├── common/                 # Shared math utilities
 │   │   ├── field_generators/       # Atomic field generators (address, dates, currency, …)
-│   │   ├── record_generators/      # Flow-level record generators
-│   │   │   ├── order_to_cash/      # Quotes → orders → shipments → invoices → receipts → cash apps
-│   │   │   └── procure_to_pay/     # Requests → POs → invoices → payments
+│   │   ├── record_generators/      # Flow-level record generators (one subdir per flow)
+│   │   │   ├── acquire_to_retire/      # Asset master → depreciation runs → disposals
+│   │   │   ├── campaign_to_conversion/ # Campaigns → impressions → engagements → leads → conversions
+│   │   │   ├── forecast_to_stock/      # Forecasts → inventory → stock params → replenishment
+│   │   │   ├── install_to_retention/   # Installs → accounts → activation events → IAPs → cohorts
+│   │   │   ├── lead_to_opportunity/    # Leads → contacts → opportunities → quotes → contracts
+│   │   │   ├── order_to_cash/          # Quotes → orders → shipments → invoices → receipts → cash apps
+│   │   │   ├── procure_to_pay/         # Requests → POs → invoices → payments
+│   │   │   └── quote_to_cash/          # Subscriptions → contracts → recurring invoices → renewals
+│   │   │   #   each flow dir contains: stage *.py files, flow.py, __init__.py, briefs/TODO.md
 │   │   └── database/               # Postgres injection logic
 │   │
 │   ├── scrutinize/                 # AI-assisted brief review agent
@@ -68,6 +76,9 @@ adorable-thunder-data-generators/
 │   │
 │   └── enterprise_dataflow_briefs/ # Source-of-truth design briefs for each flow
 │       └── *.md                    # order-to-cash, procure-to-pay, forecast-to-stock, …
+│
+├── docs/generated/                 # AI-written iteration logs (one per skill invocation)
+│   └── iter/<flow>/                # YYYY-MM-DD-HHMMSS--<skill>.md
 │
 └── tests/
     └── adorable_thunder/make/
