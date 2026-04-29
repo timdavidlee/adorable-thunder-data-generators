@@ -67,3 +67,14 @@ For each high-severity finding:
 4. Do not touch unrelated generators
 
 After edits, confirm what changed and what the fix addresses.
+
+### 5. Write iteration log
+
+After fixes are applied, record this iteration's findings and the changes made.
+
+Path: `docs/generated/iter/<flow-kebab>/<timestamp>--generate-and-scrutinize.md`
+
+- `<flow-kebab>` is the kebab-case form of the flow name (`order_to_cash` → `order-to-cash`, `procure_to_pay` → `procure-to-pay`)
+- `<timestamp>` is `date +%Y-%m-%d-%H%M%S` at completion
+
+Create the `<flow-kebab>/` subdirectory if it does not exist. Follow the contents template in [docs/generated/CLAUDE.md](../../docs/generated/CLAUDE.md). For this skill, the **What changed** paragraph should summarise the top scrutiny findings and the specific generator tweaks made for each, and **Verification** should note whether the schema regenerated cleanly.

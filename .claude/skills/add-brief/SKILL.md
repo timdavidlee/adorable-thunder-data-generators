@@ -96,6 +96,17 @@ Run the brief reviewer to confirm the new brief passes both gates:
 
 The new brief should report `Design detail: OK` and `Benchmarks: OK`. Fix any thin sections it flags.
 
+### 6. Write iteration log
+
+After the brief is in place, record what was done.
+
+Path: `docs/generated/iter/<flow-name>/<timestamp>--add-brief.md`
+
+- `<flow-name>` is the kebab-case flow name (same as the brief filename)
+- `<timestamp>` is `date +%Y-%m-%d-%H%M%S` at completion
+
+Create the `<flow-name>/` subdirectory if it does not exist. Follow the contents template in [docs/generated/CLAUDE.md](../../docs/generated/CLAUDE.md) — a few paragraphs covering what ran, what changed, verification, and follow-ups.
+
 ## Available field generators
 
 Common generators referenced across briefs (see `src/adorable_thunder/make/field_generators/` for the full list):

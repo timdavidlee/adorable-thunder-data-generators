@@ -7,6 +7,7 @@ from adorable_thunder.make.field_generators.amounts import (
     generate_local_currency_amounts,
 )
 from adorable_thunder.make.field_generators.company import generate_company_names
+from adorable_thunder.make.field_generators.country import generate_country_codes
 from adorable_thunder.make.field_generators.currency import TOP_CURRENCIES
 from adorable_thunder.make.field_generators.dates import (
     extrapolate_off_dates,
@@ -16,6 +17,7 @@ from adorable_thunder.make.field_generators.identifiers import (
     generate_n_random_uuids,
     generate_serial_numbers_with_prefix,
 )
+from adorable_thunder.make.field_generators.ledger_account import generate_ledger_accounts
 from adorable_thunder.make.field_generators.payment_terms import generate_payment_terms
 from adorable_thunder.make.record_generators.schemas import CreatePgTableSql, PgColumn
 
@@ -114,6 +116,39 @@ def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
                 llm_description="PO lifecycle status. Expected mix: approved ~55%, pending ~25%, draft ~10%, rejected ~7%, cancelled ~3%.",
                 llm_example_values="'approved', 'pending', 'draft', 'rejected', 'cancelled'",
             ),
+            PgColumn(
+                name="supplier_country",
+                data_type="VARCHAR(2)",
+                modifiers="NOT NULL",
+                llm_description=(
+                    "ISO 3166-1 alpha-2 country code of the supplier. Drives geographic "
+                    "spend, supplier diversification, and FX exposure analytics."
+                ),
+                llm_example_values="'US', 'DE', 'CN', 'IN', 'GB'",
+            ),
+            PgColumn(
+                name="supplier_category",
+                data_type="TEXT",
+                modifiers="NOT NULL",
+                llm_description=(
+                    "Industry / spend category of the supplier. Inherited from the "
+                    "originating request's spend_category."
+                ),
+                llm_example_values=(
+                    "'IT', 'PROFESSIONAL_SERVICES', 'MATERIALS', 'LOGISTICS', "
+                    "'MARKETING', 'FACILITIES', 'TRAVEL', 'OTHER'"
+                ),
+            ),
+            PgColumn(
+                name="gl_account",
+                data_type="TEXT",
+                modifiers="NOT NULL",
+                llm_description=(
+                    "GL account code (operating-expense pool) the PO will book against. "
+                    "Provides the join hook from P2P into R2R / B2R."
+                ),
+                llm_example_values="'6010', '6210', '6500'",
+            ),
         ],
     )
 
@@ -125,12 +160,14 @@ def generate_purchase_orders(
     request_ids: np.ndarray | None = None,
     request_dates: pd.Series | None = None,
     supplier_names: np.ndarray | None = None,
+    spend_categories: np.ndarray | None = None,
 ) -> pd.DataFrame:
     """Generate a DataFrame of synthetic purchase order records.
 
     Pass request_ids/request_dates from an upstream requests stage to link POs
     to requests and enforce the date chain (po_date = request_date + 1–10 days).
     Pass supplier_names to carry the requested supplier through to the PO.
+    Pass spend_categories from the request to populate supplier_category.
     When None, placeholder UUIDs and random dates within start_date/end_date are used.
     """
     if request_ids is None:
@@ -158,6 +195,13 @@ def generate_purchase_orders(
     else:
         po_dates = generate_random_dates(start_date, end_date, n_samples)
 
+    if spend_categories is None:
+        from .requests import SPEND_CATEGORIES
+
+        spend_categories = np.random.choice(SPEND_CATEGORIES, size=n_samples)
+
+    gl_accounts = generate_ledger_accounts(n_samples, account_type="opex")
+
     return pd.DataFrame(
         {
             "po_id": generate_n_random_uuids(n_samples),
@@ -179,5 +223,8 @@ def generate_purchase_orders(
             "total_amount_local": fx_df["amount_local"],
             "payment_terms": generate_payment_terms(n_samples),
             "status": np.random.choice(_PO_STATUSES, p=_PO_STATUS_WEIGHTS, size=n_samples),
+            "supplier_country": generate_country_codes(n_samples),
+            "supplier_category": spend_categories,
+            "gl_account": gl_accounts["account_code"].to_numpy(),
         }
     )

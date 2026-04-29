@@ -19,6 +19,20 @@ from adorable_thunder.make.record_generators.schemas import CreatePgTableSql, Pg
 _REQUEST_STATUSES = np.array(["approved", "initiated", "pending", "rejected"])
 _REQUEST_STATUS_WEIGHTS = np.array([0.55, 0.20, 0.15, 0.10])
 
+SPEND_CATEGORIES = np.array(
+    [
+        "IT",
+        "PROFESSIONAL_SERVICES",
+        "MATERIALS",
+        "LOGISTICS",
+        "MARKETING",
+        "FACILITIES",
+        "TRAVEL",
+        "OTHER",
+    ]
+)
+_SPEND_CATEGORY_WEIGHTS = np.array([0.25, 0.20, 0.20, 0.10, 0.10, 0.08, 0.05, 0.02])
+
 _NON_USD = [c for c in TOP_CURRENCIES if c.code != "USD"]
 _NON_USD_CODES = np.array([c.code for c in _NON_USD])
 _NON_USD_CAPS = np.array([c.market_cap_trillions for c in _NON_USD])
@@ -104,6 +118,22 @@ def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
                 llm_description="Request lifecycle status. Expected mix: approved ~55%, initiated ~20%, pending ~15%, rejected ~10%.",
                 llm_example_values="'approved', 'pending', 'rejected', 'initiated'",
             ),
+            PgColumn(
+                name="spend_category",
+                data_type="TEXT",
+                modifiers="NOT NULL",
+                llm_description=(
+                    "High-level spend category for the request. Drives category-spend "
+                    "analytics and propagates to the PO as supplier_category. Expected "
+                    "mix: IT ~25%, PROFESSIONAL_SERVICES ~20%, MATERIALS ~20%, "
+                    "LOGISTICS ~10%, MARKETING ~10%, FACILITIES ~8%, TRAVEL ~5%, "
+                    "OTHER ~2%."
+                ),
+                llm_example_values=(
+                    "'IT', 'PROFESSIONAL_SERVICES', 'MATERIALS', 'LOGISTICS', "
+                    "'MARKETING', 'FACILITIES', 'TRAVEL', 'OTHER'"
+                ),
+            ),
         ],
     )
 
@@ -151,6 +181,9 @@ def generate_requests(
             "cost_center": generate_cost_center_names(n_samples),
             "status": np.random.choice(
                 _REQUEST_STATUSES, p=_REQUEST_STATUS_WEIGHTS, size=n_samples
+            ),
+            "spend_category": np.random.choice(
+                SPEND_CATEGORIES, p=_SPEND_CATEGORY_WEIGHTS, size=n_samples
             ),
         }
     )

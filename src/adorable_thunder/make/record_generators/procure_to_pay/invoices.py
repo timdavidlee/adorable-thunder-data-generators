@@ -16,6 +16,12 @@ from adorable_thunder.make.record_generators.schemas import CreatePgTableSql, Pg
 _INVOICE_STATUSES = np.array(["paid", "received", "pending", "on_hold", "cancelled", "in_dispute"])
 _INVOICE_STATUS_WEIGHTS = np.array([0.45, 0.25, 0.15, 0.08, 0.05, 0.02])
 
+_MATCH_STATUSES = np.array(
+    ["matched", "price_variance", "qty_variance", "blocked", "unmatched"]
+)
+# 85% clean three-way match; remainder split across realistic AP exceptions.
+_MATCH_STATUS_WEIGHTS = np.array([0.85, 0.05, 0.04, 0.04, 0.02])
+
 
 INVOICES_TABLE_NAME = "invoices"
 
@@ -82,6 +88,38 @@ def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
                 llm_description="Invoice lifecycle status. Expected mix: paid ~45%, received ~25%, pending ~15%, on_hold ~8%, cancelled ~5%, in_dispute ~2%.",
                 llm_example_values="'paid', 'received', 'pending', 'on_hold', 'cancelled', 'in_dispute'",
             ),
+            PgColumn(
+                name="currency_code",
+                data_type="VARCHAR(3)",
+                modifiers="NOT NULL",
+                llm_description=(
+                    "ISO 4217 currency the invoice was billed in — inherited from the PO."
+                ),
+                llm_example_values="'USD', 'EUR', 'GBP', 'JPY'",
+            ),
+            PgColumn(
+                name="goods_receipt_date",
+                data_type="DATE",
+                modifiers="NOT NULL",
+                llm_description=(
+                    "Date the goods or services were received (the third leg of the "
+                    "three-way match). Always between po_date and invoice_date."
+                ),
+                llm_example_values="'2024-04-10', '2025-02-05'",
+            ),
+            PgColumn(
+                name="match_status",
+                data_type="TEXT",
+                modifiers="NOT NULL",
+                llm_description=(
+                    "Outcome of the three-way match between PO, goods receipt, and "
+                    "invoice. Expected mix: matched ~85%, price_variance ~5%, "
+                    "qty_variance ~4%, blocked ~4%, unmatched ~2%."
+                ),
+                llm_example_values=(
+                    "'matched', 'price_variance', 'qty_variance', 'blocked', 'unmatched'"
+                ),
+            ),
         ],
     )
 
@@ -93,6 +131,7 @@ def generate_invoices(
     po_ids: np.ndarray | None = None,
     po_dates: pd.Series | None = None,
     po_amounts_usd: np.ndarray | None = None,
+    po_currency_codes: np.ndarray | None = None,
 ) -> pd.DataFrame:
     if po_ids is None:
         po_ids = generate_n_random_uuids(n_samples)
@@ -100,10 +139,21 @@ def generate_invoices(
     if po_dates is not None:
         # PO → invoice: 14–90 days per P2P cycle time benchmarks
         invoice_dates = extrapolate_off_dates(po_dates, min_days=14, max_days=90)
+        # Goods receipt sits between PO issue and invoice. Sample uniformly between
+        # the two so the three-way-match date chain is preserved row-by-row.
+        po_dates_dt = pd.to_datetime(po_dates).reset_index(drop=True)
+        invoice_dates_dt = pd.to_datetime(invoice_dates).reset_index(drop=True)
+        spans = (invoice_dates_dt - po_dates_dt).dt.days.clip(lower=0).to_numpy()
+        offsets = (np.random.random(n_samples) * spans).astype(int)
+        goods_receipt_dates = po_dates_dt + pd.to_timedelta(offsets, unit="D")
     else:
         invoice_dates = generate_random_dates(start_date, end_date, n_samples)
+        goods_receipt_dates = invoice_dates
 
     due_dates = extrapolate_off_dates(invoice_dates, min_days=30, max_days=60)
+
+    if po_currency_codes is None:
+        po_currency_codes = np.full(n_samples, "USD", dtype=object)
 
     if po_amounts_usd is not None:
         # Invoice ≈ PO amount ±2% for minor FX/adjustment tolerance per brief
@@ -134,6 +184,11 @@ def generate_invoices(
             "tax_amount": tax_amounts,
             "status": np.random.choice(
                 _INVOICE_STATUSES, p=_INVOICE_STATUS_WEIGHTS, size=n_samples
+            ),
+            "currency_code": po_currency_codes,
+            "goods_receipt_date": goods_receipt_dates,
+            "match_status": np.random.choice(
+                _MATCH_STATUSES, p=_MATCH_STATUS_WEIGHTS, size=n_samples
             ),
         }
     )

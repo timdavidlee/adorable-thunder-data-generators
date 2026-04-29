@@ -59,22 +59,38 @@ docker compose exec postgres pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
 
 If the service fails to become healthy after ~30s, stop and report the error.
 
-### 2. Generate fresh data
+### 2. Reset the schema
+
+Drop and recreate the flow's schema CASCADE before injection. This guarantees a
+clean slate (no orphan tables, no stale grants) and re-creates `ai_readonly_user`
+grants in one step. Always pass superuser credentials — the readonly user cannot
+perform DDL:
+
+```bash
+PG_USER=postgres PG_PASSWORD=postgres PG_DBNAME=adorable_thunder \
+  uv run python -m adorable_thunder.make.database.reset_schema <flow>
+```
+
+Implementation: [reset_schema.py](src/adorable_thunder/make/database/reset_schema.py).
+
+### 3. Generate fresh data
 
 ```bash
 uv run python -m adorable_thunder.make.database.inject_into_pg \
-  --flow <flow> --n-samples 10_000 --drop
+  --flow <flow> --n-samples 10_000
 ```
 
 Valid flow values: `order_to_cash`, `procure_to_pay`  
 Default: `order_to_cash`
 
-### 3. Scrutinize via MCP tools
+`--drop` is not needed here — step 2 already left the schema empty.
+
+### 4. Scrutinize via MCP tools
 
 Use the `list_tables` and `run_sql` MCP tools directly — do NOT run
 `adorable_thunder.scrutinize`. You are the scrutinizer.
 
-#### 3a. Load the scrutiny brief
+#### 4a. Load the scrutiny brief
 
 Read the flow-specific scrutiny brief so you know which checks matter most and what
 the realism benchmarks are before running any SQL:
@@ -88,7 +104,7 @@ Flow name format here uses kebab-case: `order-to-cash`, `procure-to-pay`.
 Ingest the brief fully. The high-severity items listed there are the most likely
 to catch generator bugs — prioritise them when forming SQL queries.
 
-#### 3b. Load table LLM annotations
+#### 4b. Load table LLM annotations
 
 Run the annotation tool to get per-column descriptions, expected data types, and
 representative example values for every table in the flow. This tells you what each
@@ -107,7 +123,7 @@ Flow name format here uses kebab-case: `order-to-cash`, `procure-to-pay`.
 Read the output in full before writing any SQL — column names and value formats
 are described there, not in the live schema.
 
-#### 3c. Discover schema
+#### 4c. Discover schema
 
 Call `list_tables` to get all tables, then for each table run:
 
@@ -118,7 +134,7 @@ WHERE table_schema = 'public' AND table_name = '<table>'
 ORDER BY ordinal_position;
 ```
 
-#### 3d. Run quality checks
+#### 4d. Run quality checks
 
 For each table, run the checks below. Adapt column names to what you discovered.
 
@@ -126,7 +142,7 @@ Please use the guidelines outline in the scrutinize briefs:
 
 `src/adorable_thunder/scrutinize/specific_briefs/<flow>.md`
 
-#### 3e. Form findings
+#### 4e. Form findings
 
 After running the checks, produce findings in this structure for each issue:
 
@@ -146,7 +162,7 @@ Report a summary:
 - Top high-severity issues (issue + suggestion)
 - Overall verdict
 
-### 4. Edit generator scripts
+### 5. Edit generator scripts
 
 Generator files live in:
 
@@ -161,3 +177,14 @@ For each high-severity finding:
 4. Do not touch unrelated generators
 
 After edits, confirm what changed and what the fix addresses.
+
+### 6. Write iteration log
+
+After fixes are applied, record this iteration's findings and the changes made.
+
+Path: `docs/generated/iter/<flow-kebab>/<timestamp>--generate-and-scrutinize-mcp.md`
+
+- `<flow-kebab>` is the kebab-case form of the flow name (`order_to_cash` → `order-to-cash`, `procure_to_pay` → `procure-to-pay`)
+- `<timestamp>` is `date +%Y-%m-%d-%H%M%S` at completion
+
+Create the `<flow-kebab>/` subdirectory if it does not exist. Follow the contents template in [docs/generated/CLAUDE.md](../../docs/generated/CLAUDE.md). For this skill, the **What changed** paragraph should summarise the top scrutiny findings (with severity counts) and the specific generator tweaks made for each, and **Verification** should note whether the schema regenerated cleanly.

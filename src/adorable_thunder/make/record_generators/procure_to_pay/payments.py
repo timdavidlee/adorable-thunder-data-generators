@@ -80,6 +80,17 @@ def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
                 llm_description="Payment lifecycle status. Expected mix: paid ~60%, scheduled ~25%, on_hold ~10%, cancelled ~5%.",
                 llm_example_values="'paid', 'scheduled', 'on_hold', 'cancelled'",
             ),
+            PgColumn(
+                name="payment_run_id",
+                data_type="UUID",
+                modifiers="NOT NULL",
+                llm_description=(
+                    "AP payment-run batch identifier. All payments disbursed in the "
+                    "same ISO calendar week share a payment_run_id, mirroring how AP "
+                    "teams batch payments."
+                ),
+                llm_example_values="'e5f6a7b8-c9d0-1234-efab-345678901234'",
+            ),
         ],
     )
 
@@ -126,6 +137,14 @@ def generate_payments(
             "USD",
         )
 
+    # Bucket payments into runs by ISO calendar week — one shared UUID per (year, week).
+    payment_dates_dt = pd.to_datetime(payment_dates)
+    iso = payment_dates_dt.dt.isocalendar()
+    week_keys = list(zip(iso["year"].to_numpy(), iso["week"].to_numpy()))
+    unique_keys = sorted(set(week_keys))
+    run_id_by_key = dict(zip(unique_keys, generate_n_random_uuids(len(unique_keys))))
+    payment_run_ids = np.array([run_id_by_key[k] for k in week_keys])
+
     return pd.DataFrame(
         {
             "payment_id": generate_n_random_uuids(n_samples),
@@ -139,5 +158,6 @@ def generate_payments(
             "status": np.random.choice(
                 _PAYMENT_STATUSES, p=_PAYMENT_STATUS_WEIGHTS, size=n_samples
             ),
+            "payment_run_id": payment_run_ids,
         }
     )

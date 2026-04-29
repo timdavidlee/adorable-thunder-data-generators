@@ -51,6 +51,16 @@ src/adorable_thunder/make/record_generators/<flow_name>/
   <stage1>.py
   <stage2>.py
   ...
+  briefs/
+    TODO.md
+```
+
+`briefs/TODO.md` is the living wishlist that `/insights-wishlist` appends to. Seed it with a header like:
+
+```markdown
+# Insights Wishlist TODO — <flow_name>
+
+Living TODO of field/data additions proposed by `/insights-wishlist`. Full runs are archived under `docs/generated/iter/<flow-name>/`. Prune entries here as they are implemented or become irrelevant.
 ```
 
 For each stage file, implement:
@@ -96,3 +106,29 @@ uv run ruff check src/ && uv run pyright
 ```
 
 Fix any errors before reporting done.
+
+### 6. Update BRIEFS.md registry
+
+File: `BRIEFS.md` at the repo root.
+
+Find the row for `<flow-name>` in the table and update both **Status** and **Last Updated**:
+
+```
+| [<flow-name>](src/adorable_thunder/enterprise_dataflow_briefs/<flow-name>.md) | has dataset | <YYYY-MM-DD> |
+```
+
+Use today's date. Rows are sorted alphabetically by brief name — keep that ordering.
+
+If no row exists yet (e.g. a brand-new brief that wasn't in the registry), insert one in
+the correct alphabetical position.
+
+### 7. Write iteration log
+
+After all wiring is done and verification has passed, record what was built.
+
+Path: `docs/generated/iter/<flow-name>/<timestamp>--add-flow.md`
+
+- `<flow-name>` is the kebab-case flow name (e.g. `record-to-report`)
+- `<timestamp>` is `date +%Y-%m-%d-%H%M%S` at completion
+
+Create the `<flow-name>/` subdirectory if it does not exist. Follow the contents template in [docs/generated/CLAUDE.md](../../docs/generated/CLAUDE.md) — a few paragraphs covering what ran, what changed (enterprise brief, scrutiny brief, generator package, `inject_into_pg.py` wiring, `BRIEFS.md` row), verification (inject succeeded, ruff/pyright clean), and follow-ups.

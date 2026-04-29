@@ -28,6 +28,7 @@ class GeneratorConfig(BaseGeneratorConfig):
             request_ids=active_requests["request_id"].to_numpy(),
             request_dates=active_requests["request_date"],
             supplier_names=active_requests["supplier_name"].to_numpy(),
+            spend_categories=active_requests["spend_category"].to_numpy(),
         )
 
         # Invoices are only raised against approved POs — pending/draft POs haven't
@@ -42,6 +43,7 @@ class GeneratorConfig(BaseGeneratorConfig):
             po_ids=approved_pos["po_id"].to_numpy(),
             po_dates=approved_pos["po_date"],
             po_amounts_usd=approved_pos["total_amount_usd"].to_numpy(),
+            po_currency_codes=approved_pos["currency_code"].to_numpy(),
         )
 
         active_inv_mask = invoices["status"] != "cancelled"

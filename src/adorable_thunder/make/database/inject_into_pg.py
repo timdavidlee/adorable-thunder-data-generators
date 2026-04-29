@@ -8,6 +8,12 @@ from pandas import DataFrame
 from psycopg import AsyncCursor, sql
 
 from adorable_thunder.make.database.database_connection import PgConnConfig
+from adorable_thunder.make.record_generators.acquire_to_retire import (
+    FLOW_SCHEMAS as A2R_FLOW_SCHEMAS,
+)
+from adorable_thunder.make.record_generators.acquire_to_retire import (
+    GeneratorConfig as A2RGeneratorConfig,
+)
 from adorable_thunder.make.record_generators.campaign_to_conversion import (
     FLOW_SCHEMAS as C2C_FLOW_SCHEMAS,
 )
@@ -19,6 +25,12 @@ from adorable_thunder.make.record_generators.forecast_to_stock import (
 )
 from adorable_thunder.make.record_generators.forecast_to_stock import (
     GeneratorConfig as F2SGeneratorConfig,
+)
+from adorable_thunder.make.record_generators.install_to_retention import (
+    FLOW_SCHEMAS as I2R_FLOW_SCHEMAS,
+)
+from adorable_thunder.make.record_generators.install_to_retention import (
+    GeneratorConfig as I2RGeneratorConfig,
 )
 from adorable_thunder.make.record_generators.lead_to_opportunity import (
     FLOW_SCHEMAS as L2O_FLOW_SCHEMAS,
@@ -56,6 +68,8 @@ ALL_FLOW_GENERATORS: list[tuple[type[BaseGeneratorConfig], list[CreatePgTableSql
     (L2OGeneratorConfig, L2O_FLOW_SCHEMAS),
     (F2SGeneratorConfig, F2S_FLOW_SCHEMAS),
     (Q2CGeneratorConfig, Q2C_FLOW_SCHEMAS),
+    (I2RGeneratorConfig, I2R_FLOW_SCHEMAS),
+    (A2RGeneratorConfig, A2R_FLOW_SCHEMAS),
 ]
 
 _FLOW_NAMES = [config.name for config, _ in ALL_FLOW_GENERATORS]
