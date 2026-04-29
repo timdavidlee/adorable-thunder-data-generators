@@ -127,6 +127,16 @@ def create_pg_sql_table_schema(pg_schema: str) -> CreatePgTableSql:
                 llm_example_values="'2025-04-15', NULL",
             ),
             PgColumn(
+                name="pause_date",
+                data_type="DATE",
+                modifiers="",
+                llm_description=(
+                    "Date the subscription was paused (billing suspended). Populated only when "
+                    "status='paused'. No invoices or usage with date > pause_date."
+                ),
+                llm_example_values="'2025-06-15', NULL",
+            ),
+            PgColumn(
                 name="auto_renew",
                 data_type="BOOLEAN",
                 modifiers="NOT NULL",
@@ -211,17 +221,27 @@ def generate_subscriptions(
     dataset_end = pd.Timestamp(end_date)
 
     churn_dates = pd.Series([pd.NaT] * n_samples, dtype="datetime64[ns]")
-    churn_mask = statuses == "churned"
-    if churn_mask.any():
-        churn_idx = np.where(churn_mask)[0]
-        starts = sub_start_dates.iloc[churn_idx].to_numpy()
-        ends = np.minimum(sub_end_dates.iloc[churn_idx].to_numpy(), dataset_end.to_numpy())
+    pause_dates = pd.Series([pd.NaT] * n_samples, dtype="datetime64[ns]")
+
+    def _sample_stop_dates(idx: np.ndarray) -> pd.DatetimeIndex:
+        starts = sub_start_dates.iloc[idx].to_numpy()
+        ends = np.minimum(sub_end_dates.iloc[idx].to_numpy(), dataset_end.to_numpy())
         spans = (ends - starts).astype("timedelta64[D]").astype(int)
         spans = np.clip(spans, 1, None)
         offsets = np.array(
             [np.random.randint(1, int(s) + 1) for s in spans.tolist()], dtype=int
         )
-        churn_dates.iloc[churn_idx] = pd.to_datetime(starts) + pd.to_timedelta(offsets, unit="D")
+        return pd.to_datetime(starts) + pd.to_timedelta(offsets, unit="D")
+
+    churn_mask = statuses == "churned"
+    if churn_mask.any():
+        churn_idx = np.where(churn_mask)[0]
+        churn_dates.iloc[churn_idx] = _sample_stop_dates(churn_idx)
+
+    pause_mask = statuses == "paused"
+    if pause_mask.any():
+        pause_idx = np.where(pause_mask)[0]
+        pause_dates.iloc[pause_idx] = _sample_stop_dates(pause_idx)
 
     auto_renew = np.random.random(n_samples) < 0.60
 
@@ -239,6 +259,7 @@ def generate_subscriptions(
             "start_date": sub_start_dates,
             "end_date": sub_end_dates,
             "churn_date": churn_dates,
+            "pause_date": pause_dates,
             "auto_renew": auto_renew,
             "status": statuses,
             "_term_months": term_months,

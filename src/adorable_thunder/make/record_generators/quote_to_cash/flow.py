@@ -24,7 +24,10 @@ class GeneratorConfig(BaseGeneratorConfig):
         sub_ids = subs["sub_id"].to_numpy()
         sub_starts = subs["start_date"]
         sub_ends = subs["end_date"]
-        churn_dates = subs["churn_date"]
+        # Earliest of churn_date and pause_date — both halt billing.
+        billing_stop = pd.concat(
+            [pd.to_datetime(subs["churn_date"]), pd.to_datetime(subs["pause_date"])], axis=1
+        ).min(axis=1)
         cycles = subs["billing_cycle_months"].to_numpy()
         mrr = subs["mrr_usd"].to_numpy()
         currencies = subs["currency_code"].to_numpy()
@@ -49,7 +52,7 @@ class GeneratorConfig(BaseGeneratorConfig):
             billing_cycle_months=cycles,
             mrr_usd=mrr,
             currency_codes=currencies,
-            churn_dates=churn_dates,
+            churn_dates=billing_stop,
             dataset_end=self.end_date,
         )
 
@@ -58,7 +61,7 @@ class GeneratorConfig(BaseGeneratorConfig):
             sub_start_dates=sub_starts,
             sub_end_dates=sub_ends,
             billing_cycle_months=cycles,
-            churn_dates=churn_dates,
+            churn_dates=billing_stop,
             dataset_end=self.end_date,
         )
 
