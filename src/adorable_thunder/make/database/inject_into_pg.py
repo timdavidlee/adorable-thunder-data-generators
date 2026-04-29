@@ -60,6 +60,12 @@ from adorable_thunder.make.record_generators.schemas import (
     BaseGeneratorConfig,
     CreatePgTableSql,
 )
+from adorable_thunder.make.record_generators.warehouse_management import (
+    FLOW_SCHEMAS as WM_FLOW_SCHEMAS,
+)
+from adorable_thunder.make.record_generators.warehouse_management import (
+    GeneratorConfig as WMGeneratorConfig,
+)
 
 ALL_FLOW_GENERATORS: list[tuple[type[BaseGeneratorConfig], list[CreatePgTableSql]]] = [
     (O2CGeneratorConfig, O2C_FLOW_SCHEMAS),
@@ -70,6 +76,7 @@ ALL_FLOW_GENERATORS: list[tuple[type[BaseGeneratorConfig], list[CreatePgTableSql
     (Q2CGeneratorConfig, Q2C_FLOW_SCHEMAS),
     (I2RGeneratorConfig, I2R_FLOW_SCHEMAS),
     (A2RGeneratorConfig, A2R_FLOW_SCHEMAS),
+    (WMGeneratorConfig, WM_FLOW_SCHEMAS),
 ]
 
 _FLOW_NAMES = [config.name for config, _ in ALL_FLOW_GENERATORS]

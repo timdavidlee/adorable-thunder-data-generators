@@ -31,4 +31,4 @@ record generator. Maintained by the `add-flow` and `generate-and-scrutinize-mcp`
 | [signup-to-renewal](src/adorable_thunder/enterprise_dataflow_briefs/signup-to-renewal.md) | brief only | 2026-04-27 |
 | [transportation-and-logistics](src/adorable_thunder/enterprise_dataflow_briefs/transportation-and-logistics.md) | brief only | 2026-04-25 |
 | [trial-to-membership](src/adorable_thunder/enterprise_dataflow_briefs/trial-to-membership.md) | brief only | 2026-04-27 |
-| [warehouse-management](src/adorable_thunder/enterprise_dataflow_briefs/warehouse-management.md) | brief only | 2026-04-25 |
+| [warehouse-management](src/adorable_thunder/enterprise_dataflow_briefs/warehouse-management.md) | has dataset | 2026-04-28 |
