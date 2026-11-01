@@ -24,3 +24,4 @@ Both `make/` (generation) and `scrutinize/` (realism evaluation) treat these as 
 @cart-to-fulfillment.md
 @trial-to-membership.md
 @install-to-retention.md
+@onboard-to-offboard.md
