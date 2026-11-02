@@ -21,6 +21,7 @@ record generator. Maintained by the `add-flow` and `generate-and-scrutinize-mcp`
 | [forecast-to-stock](src/adorable_thunder/enterprise_dataflow_briefs/forecast-to-stock.md) | has dataset | 2026-04-28 |
 | [install-to-retention](src/adorable_thunder/enterprise_dataflow_briefs/install-to-retention.md) | has dataset | 2026-04-28 |
 | [lead-to-opportunity](src/adorable_thunder/enterprise_dataflow_briefs/lead-to-opportunity.md) | has dataset | 2026-04-28 |
+| [onboard-to-offboard](src/adorable_thunder/enterprise_dataflow_briefs/onboard-to-offboard.md) | has dataset | 2026-10-31 |
 | [order-to-cash](src/adorable_thunder/enterprise_dataflow_briefs/order-to-cash.md) | has dataset | 2026-04-28 |
 | [plan-to-produce](src/adorable_thunder/enterprise_dataflow_briefs/plan-to-produce.md) | brief only | 2026-04-25 |
 | [procure-to-pay](src/adorable_thunder/enterprise_dataflow_briefs/procure-to-pay.md) | has dataset | 2026-04-28 |

@@ -38,6 +38,12 @@ from adorable_thunder.make.record_generators.lead_to_opportunity import (
 from adorable_thunder.make.record_generators.lead_to_opportunity import (
     GeneratorConfig as L2OGeneratorConfig,
 )
+from adorable_thunder.make.record_generators.onboard_to_offboard import (
+    FLOW_SCHEMAS as O2O_FLOW_SCHEMAS,
+)
+from adorable_thunder.make.record_generators.onboard_to_offboard import (
+    GeneratorConfig as O2OGeneratorConfig,
+)
 from adorable_thunder.make.record_generators.order_to_cash import (
     FLOW_SCHEMAS as O2C_FLOW_SCHEMAS,
 )
@@ -77,6 +83,7 @@ ALL_FLOW_GENERATORS: list[tuple[type[BaseGeneratorConfig], list[CreatePgTableSql
     (I2RGeneratorConfig, I2R_FLOW_SCHEMAS),
     (A2RGeneratorConfig, A2R_FLOW_SCHEMAS),
     (WMGeneratorConfig, WM_FLOW_SCHEMAS),
+    (O2OGeneratorConfig, O2O_FLOW_SCHEMAS),
 ]
 
 _FLOW_NAMES = [config.name for config, _ in ALL_FLOW_GENERATORS]
